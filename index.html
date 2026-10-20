@@ -44,7 +44,7 @@
                 <div id="loginForm" class="bg-white p-6 rounded-3xl border border-slate-200/80 custom-shadow space-y-4">
                     <div class="text-center space-y-1">
                         <h2 class="text-base font-bold text-slate-900">เข้าสู่ระบบ FitNavy</h2>
-                        <p class="text-xs text-slate-500">พิมพ์ชื่อผู้ใช้เพื่อดึงข้อมูลจากทุกอุปกรณ์</p>
+                        <p class="text-xs text-slate-500">พิมพ์ชื่อผู้ใช้เพื่อดึงข้อมูลแบบเรียลไทม์</p>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
@@ -171,7 +171,7 @@
                     <div class="space-y-2.5">
                         <div class="flex justify-between items-center px-1">
                             <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">📝 ประวัติวันนี้ (จัดกลุ่มตามมื้อ)</h4>
-                            <span class="text-[10px] text-slate-400">กดปุ่ม ✕ เพื่อลบรายการ</span>
+                            <span class="text-[10px] text-slate-400">กด ✕ เพื่อลบรายการแบบเรียลไทม์</span>
                         </div>
                         <div id="diaryList" class="space-y-3 min-h-[100px]">
                             <div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>
@@ -187,7 +187,7 @@
                             <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เพิ่มเมนูส่วนตัว</button>
                         </div>
 
-                        <!-- CUSTOM FOOD FORM (Support Dish & Smart AI Estimation) -->
+                        <!-- CUSTOM FOOD FORM -->
                         <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2.5 text-xs">
                             <span class="font-bold text-blue-950 block">เพิ่มเมนูส่วนตัว (พิมพ์ชื่อระบบคิดแคลให้ทันที)</span>
                             <div>
@@ -348,12 +348,23 @@
             document.getElementById('selectDate').value = todayStr;
             populateFoodDropdown(foodDatabase);
 
+            // ⚡ ระบบจำผู้ใช้อัตโนมัติ เข้ามาแล้วโหลดข้อมูลทันทีแบบเรียลไทม์
             const savedUser = localStorage.getItem('fitnavy_username');
             if (savedUser) {
                 document.getElementById('loginUsername').value = savedUser;
-                handleLogin();
+                handleLoginSilent(savedUser);
             }
         };
+
+        async function handleLoginSilent(username) {
+            try {
+                const res = await fetch(`${API_URL}?action=checkUser&username=${encodeURIComponent(username)}`).then(r => r.json());
+                if (res && res.exists) {
+                    currentProfile = res.profile;
+                    showApp();
+                }
+            } catch(e) {}
+        }
 
         function switchAuthTab(tab) {
             if (tab === 'login') {
@@ -512,24 +523,23 @@
                 "บันทึกน้ำหนักตัว": []
             };
 
-            items.forEach((item, index) => {
+            items.forEach((item) => {
                 if (item.type === 'food') {
                     totalEaten += item.calories;
-                    if (item.detail.includes("มื้อเช้า")) mealsMap["มื้อเช้า"].push({ ...item, origIndex: index });
-                    else if (item.detail.includes("มื้อเที่ยง")) mealsMap["มื้อเที่ยง"].push({ ...item, origIndex: index });
-                    else if (item.detail.includes("มื้อเย็น")) mealsMap["มื้อเย็น"].push({ ...item, origIndex: index });
-                    else mealsMap["ของว่าง/เครื่องดื่ม"].push({ ...item, origIndex: index });
+                    if (item.detail.includes("มื้อเช้า")) mealsMap["มื้อเช้า"].push(item);
+                    else if (item.detail.includes("มื้อเที่ยง")) mealsMap["มื้อเที่ยง"].push(item);
+                    else if (item.detail.includes("มื้อเย็น")) mealsMap["มื้อเย็น"].push(item);
+                    else mealsMap["ของว่าง/เครื่องดื่ม"].push(item);
                 } else if (item.type === 'exercise') {
                     totalBurn += item.calories;
-                    mealsMap["กิจกรรมออกกำลังกาย"].push({ ...item, origIndex: index });
+                    mealsMap["กิจกรรมออกกำลังกาย"].push(item);
                 } else if (item.type === 'weight') {
                     hasWeight = true;
-                    mealsMap["บันทึกน้ำหนักตัว"].push({ ...item, origIndex: index });
+                    mealsMap["บันทึกน้ำหนักตัว"].push(item);
                     calculateBMI(item.calories, currentProfile.height);
                 }
             });
 
-            // Render Grouped Diary
             let html = '';
             const mealKeys = ["มื้อเช้า", "มื้อเที่ยง", "มื้อเย็น", "ของว่าง/เครื่องดื่ม", "กิจกรรมออกกำลังกาย", "บันทึกน้ำหนักตัว"];
             let hasAnyData = items.length > 0;
@@ -566,7 +576,7 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="${badgeColor} font-bold px-2 py-0.5 rounded-lg border text-[11px]">${prefix}${sub.calories} ${unitSuffix}</span>
-                                    <button onclick="deleteItemRecord('${sub.name}', '${sub.calories}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
+                                    <button onclick="deleteItemRecord(${sub.rowIndex}, '${sub.name}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
                                 </div>
                             </div>`;
                     });
@@ -639,7 +649,6 @@
 
         function toggleCustomFoodForm() { document.getElementById('customFoodForm').classList.toggle('hidden'); }
 
-        // AI Smart Estimate for Custom Dish
         function aiEstimateCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
             if (!name) { alert('กรุณากรอกชื่อเมนูก่อนกดให้ AI คำนวณครับ'); return; }
@@ -681,7 +690,7 @@
             if (isNaN(amount) || amount <= 0) { alert('กรุณาระบุปริมาณที่ถูกต้อง'); return; }
 
             const food = foodDatabase[idx];
-            let totalCal = (food.unit === 'จาน') ? Math.round(food.calPerUnit * amount) : Math.round(food.calPerUnit * amount);
+            let totalCal = Math.round(food.calPerUnit * amount);
 
             selectedBatchFoods.push({ name: food.name, amount: amount, unit: food.unit, calories: totalCal });
             document.getElementById('foodAmount').value = '1';
@@ -739,22 +748,22 @@
             } catch(e) {}
         }
 
-        async function deleteItemRecord(itemName, itemCal) {
+        async function deleteItemRecord(rowIndex, itemName) {
             if (!confirm(`ต้องการลบรายการ "${itemName}" ออกจากระบบใช่ไหมครับ?`)) return;
             const selectedDate = document.getElementById('selectDate').value;
 
             try {
-                const payload = [{ username: currentProfile.username, date: selectedDate, type: 'delete', name: itemName, calories: itemCal, detail: '' }];
+                const payload = [{ type: 'delete', rowIndex: rowIndex }];
                 const res = await fetch(API_URL, {
                     method: "POST",
                     body: JSON.stringify({ action: "saveBatch", payload: payload })
                 }).then(r => r.json());
 
+                // โหลดข้อมูลหน้าจอใหม่แบบเรียลไทม์ทันที
                 loadDashboardData();
             } catch(e) { alert("ลบรายการไม่สำเร็จ"); }
         }
 
-        // AI Healthy Menu Filter (Only Healthy)
         function generateAIMenu(mealTarget) {
             let eaten = 0;
             todayItems.forEach(i => { if (i.type === 'food') eaten += i.calories; });
