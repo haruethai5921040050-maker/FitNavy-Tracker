@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FitNavy - Calorie Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .navy-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); }
+        .custom-shadow { box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.12); }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex justify-center items-center p-0 sm:p-4 selection:bg-blue-200">
+
+    <div class="w-full max-w-md bg-slate-50 min-h-screen sm:min-h-[850px] sm:rounded-[36px] shadow-2xl flex flex-col overflow-hidden border border-slate-200/80 relative pb-20">
+        
+        <!-- APP HEADER -->
+        <header class="navy-gradient text-white px-6 pt-5 pb-4 flex justify-between items-center shadow-lg relative z-20">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">⚓</span>
+                    <h1 class="text-lg font-bold tracking-wide text-white">FitNavy</h1>
+                </div>
+                <p id="userDisplay" class="text-[11px] text-blue-200/90 font-light mt-0.5">ระบบติดตามแคลอรีอัจฉริยะ</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="loadDashboardData()" title="รีเฟรชข้อมูล" class="p-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-full transition border border-white/10 text-xs">
+                    🔄
+                </button>
+                <button id="btnLogout" onclick="logout()" class="hidden text-xs bg-red-500/80 hover:bg-red-500 text-white px-3 py-1.5 rounded-full border border-red-400/30 font-medium transition shadow-sm">
+                    ออก
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-1 overflow-y-auto px-4 py-5 space-y-4">
+            
+            <!-- AUTHENTICATION -->
+            <div id="authSection" class="space-y-5 pt-2">
+                <div class="flex bg-slate-200/80 p-1.5 rounded-2xl border border-slate-300/60">
+                    <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-900 text-white transition shadow-md">
+                        เข้าสู่ระบบ
+                    </button>
+                    <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition">
+                        สร้างโปรไฟล์ใหม่
+                    </button>
+                </div>
+
+                <!-- LOGIN FORM -->
+                <div id="loginForm" class="bg-white p-6 rounded-3xl border border-slate-200/80 custom-shadow space-y-4">
+                    <div class="text-center space-y-1">
+                        <h2 class="text-base font-bold text-slate-900">เข้าสู่ระบบ FitNavy</h2>
+                        <p class="text-xs text-slate-500">พิมพ์ชื่อผู้ใช้เพื่อดึงข้อมูลจากทุกอุปกรณ์</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
+                        <input type="text" id="loginUsername" placeholder="เช่น john_navy" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800/30 focus:border-blue-800 transition">
+                    </div>
+                    <div id="loginError" class="text-xs text-rose-600 font-medium hidden text-center bg-rose-50 p-3 rounded-2xl border border-rose-200/80">
+                        ❌ ไม่พบชื่อนี้ในระบบ รบกวนกดสร้างโปรไฟล์ใหม่ก่อนนะครับ
+                    </div>
+                    <button id="btnLoginSubmit" onclick="handleLogin()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-lg shadow-blue-900/20 text-sm">
+                        เข้าสู่ระบบ
+                    </button>
+                </div>
+
+                <!-- REGISTER FORM -->
+                <div id="registerForm" class="bg-white p-6 rounded-3xl border border-slate-200/80 custom-shadow space-y-3.5 hidden">
+                    <div class="text-center space-y-1">
+                        <h2 class="text-base font-bold text-slate-900">สร้างโปรไฟล์ใหม่</h2>
+                        <p class="text-xs text-slate-500">ตั้งค่าส่วนตัวสำหรับการใช้งานระยะยาว</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ตั้งชื่อผู้ใช้งาน (Username)</label>
+                        <input type="text" id="regUsername" placeholder="เช่น john_navy" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-slate-800 text-xs">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">อายุ (ปี)</label>
+                            <input type="number" id="regAge" value="25" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">เพศ</label>
+                            <select id="regGender" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                <option value="male">ชาย</option>
+                                <option value="female">หญิง</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">น้ำหนักปัจจุบัน (กก.)</label>
+                            <input type="number" step="0.1" id="regWeight" value="65" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-600 mb-1">ส่วนสูง (ซม.)</label>
+                            <input type="number" id="regHeight" value="170" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-slate-600 mb-1">เป้าหมายหลัก</label>
+                        <select id="regGoal" onchange="toggleGoalFields()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                            <option value="lose">ลดน้ำหนัก</option>
+                            <option value="maintain" selected>รักษาน้ำหนัก</option>
+                        </select>
+                    </div>
+
+                    <div id="loseGoalGroup" class="space-y-2 border-t border-slate-200 pt-2.5 hidden">
+                        <div>
+                            <label class="block text-xs text-blue-900 font-semibold mb-1">เป้าหมายน้ำหนักที่ต้องการลด (กก.)</label>
+                            <input type="number" step="0.1" id="regTargetLoss" placeholder="เช่น 5" class="w-full bg-blue-50/60 border border-blue-200 rounded-xl px-3 py-2 text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-blue-950 mb-1">เป้าหมายแคลอรีที่กินต่อวัน (Kcal)</label>
+                        <input type="number" id="regTargetCalories" value="1500" class="w-full bg-blue-50/80 border border-blue-300 rounded-xl px-3.5 py-2 text-xs font-bold text-blue-900">
+                    </div>
+
+                    <button onclick="handleRegister()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-sm mt-1">
+                        บันทึกโปรไฟล์
+                    </button>
+                </div>
+            </div>
+
+            <!-- MAIN APP SECTION -->
+            <div id="appSection" class="hidden space-y-4">
+                
+                <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm flex justify-between items-center text-xs">
+                    <div class="flex items-center gap-2 font-bold text-slate-800">
+                        <span>📅</span>
+                        <input type="date" id="selectDate" onchange="loadDashboardData()" class="bg-slate-100 text-slate-800 px-2.5 py-1 rounded-xl border border-slate-200 font-medium focus:outline-none">
+                    </div>
+                    <span id="dayCounter" class="bg-blue-950 text-white text-[10px] px-3 py-1 rounded-full font-medium tracking-wide">ทำมาแล้ว 1 วัน</span>
+                </div>
+
+                <!-- PAGE 1: DASHBOARD -->
+                <div id="pageDashboard" class="space-y-4">
+                    <div id="weightAlert" class="bg-amber-500/10 border border-amber-500/30 p-3 rounded-2xl flex justify-between items-center text-xs hidden">
+                        <span class="text-amber-900 font-medium flex items-center gap-1.5">⚖️ วันนี้ยังไม่ได้บันทึกน้ำหนัก</span>
+                        <button onclick="switchPage('progress')" class="text-[10px] bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded-xl font-bold shadow-sm">บันทึก</button>
+                    </div>
+
+                    <div class="navy-gradient text-white p-5 rounded-3xl custom-shadow space-y-4 relative overflow-hidden">
+                        <div class="flex justify-between items-center text-xs border-b border-white/10 pb-2.5">
+                            <span class="text-blue-200 font-light tracking-wide">สรุปพลังงานวันนี้</span>
+                            <span id="badgeBuffer" class="text-[10px] bg-amber-400 text-slate-950 font-bold px-2.5 py-0.5 rounded-full hidden">🔒 สำรองมื้อเย็น 350 kcal</span>
+                        </div>
+                        <div class="grid grid-cols-3 text-center gap-2">
+                            <div class="bg-white/10 p-2.5 rounded-2xl border border-white/10">
+                                <span class="text-[10px] text-blue-200 block mb-0.5">เป้าหมาย</span>
+                                <span id="statTarget" class="text-base font-bold">0</span>
+                            </div>
+                            <div class="bg-white/10 p-2.5 rounded-2xl border border-white/10">
+                                <span class="text-[10px] text-blue-200 block mb-0.5">ทานไป (-</span>
+                                <span id="statEaten" class="text-base font-bold text-rose-300">0</span>
+                            </div>
+                            <div class="bg-white/10 p-2.5 rounded-2xl border border-white/10">
+                                <span class="text-[10px] text-blue-200 block mb-0.5">เผาผลาญ (+</span>
+                                <span id="statBurn" class="text-base font-bold text-emerald-300">0</span>
+                            </div>
+                        </div>
+                        <div class="text-center pt-1">
+                            <span class="text-xs text-blue-200/90 block mb-1">คงเหลือทานได้อีก (Kcal)</span>
+                            <span id="statRemaining" class="text-4xl font-extrabold tracking-tight text-white">0</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-sm space-y-2.5">
+                        <span class="text-xs font-bold text-slate-700 block">📌 สถานะบันทึกมื้ออาหารวันนี้</span>
+                        <div class="grid grid-cols-4 gap-1.5 text-center text-[10px] font-medium">
+                            <div id="chkBreakfast" class="py-2.5 px-1 rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">🌅 มื้อเช้า</div>
+                            <div id="chkLunch" class="py-2.5 px-1 rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">☀️ มื้อเที่ยง</div>
+                            <div id="chkDinner" class="py-2.5 px-1 rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">🌙 มื้อเย็น</div>
+                            <div id="chkSnack" class="py-2.5 px-1 rounded-2xl border border-slate-200 bg-slate-50 text-slate-400">☕ ของว่าง</div>
+                        </div>
+                    </div>
+
+                    <div id="exerciseCompensateBox" class="bg-rose-50 border border-rose-200 p-3.5 rounded-2xl space-y-1 hidden">
+                        <span class="text-xs font-bold text-rose-900 flex items-center gap-1">⚠️ ทานเกินโควตาเป้าหมาย!</span>
+                        <p id="exCompensateText" class="text-xs text-rose-700 leading-relaxed"></p>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        <div class="flex justify-between items-center px-1">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">📝 ประวัติวันนี้</h4>
+                            <span class="text-[10px] text-slate-400">เรียงตามเวลาล่าสุด</span>
+                        </div>
+                        <div id="diaryList" class="space-y-2 min-h-[100px]">
+                            <div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 2: LOG FOOD & AI MENU -->
+                <div id="pageFood" class="space-y-4 hidden">
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3.5">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร (เลือกหลายรายการ)</h3>
+                            <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เมนูส่วนตัว</button>
+                        </div>
+
+                        <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2 text-xs">
+                            <span class="font-bold text-blue-950 block">เพิ่มเมนูส่วนตัวเข้าคลัง</span>
+                            <input type="text" id="newFoodName" placeholder="ชื่อเมนู (เช่น อกไก่ย่าง)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="number" step="0.01" id="newFoodCal" placeholder="แคลอรีต่อ 1 หน่วย" class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                <select id="newFoodUnit" class="bg-white border border-slate-300 rounded-xl px-2 py-2 text-xs">
+                                    <option value="g">ต่อ 1 กรัม (g)</option>
+                                    <option value="ml">ต่อ 1 มล. (ml)</option>
+                                </select>
+                            </div>
+                            <button onclick="addNewCustomFood()" class="w-full bg-blue-900 text-white py-2 rounded-xl font-medium">บันทึกเข้าคลัง</button>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">เลือกมื้ออาหาร</label>
+                            <select id="foodMealType" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none">
+                                <option value="มื้อเช้า">🌅 มื้อเช้า</option>
+                                <option value="มื้อเที่ยง">☀️ มื้อเที่ยง</option>
+                                <option value="มื้อเย็น">🌙 มื้อเย็น</option>
+                                <option value="ของว่าง/เครื่องดื่ม">☕ ของว่าง/เครื่องดื่ม</option>
+                            </select>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="col-span-2">
+                                <label class="block text-xs font-medium text-slate-600 mb-1">เลือกรายการอาหาร</label>
+                                <select id="foodSelect" onchange="updateUnitLabel()" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none">
+                                </select>
+                            </div>
+                            <div>
+                                <label id="labelAmount" class="block text-xs font-medium text-slate-600 mb-1">ปริมาณ</label>
+                                <input type="number" id="foodAmount" placeholder="100" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <button onclick="addFoodToBatch()" class="w-full bg-blue-800 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-semibold py-2.5 rounded-2xl transition">
+                            + ใส่ในรายการมื้อนี้
+                        </button>
+
+                        <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                            <span class="text-xs font-bold text-slate-600 block">รายการมื้อนี้เตรียมบันทึก:</span>
+                            <div id="batchFoodList" class="space-y-1.5 min-h-[50px] max-h-[130px] overflow-y-auto bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80 text-xs">
+                                <div class="text-center text-slate-400 py-3">ยังไม่ได้เลือกรายการ</div>
+                            </div>
+                        </div>
+
+                        <button onclick="submitBatchFood()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-xs">
+                            บันทึกมื้ออาหารทั้งหมด
+                        </button>
+                    </div>
+
+                    <div class="bg-blue-50/80 p-4 rounded-3xl border border-blue-100 space-y-2.5">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-blue-950 flex items-center gap-1">🤖 AI ช่วยคิดเมนูสร้างสรรค์</span>
+                            <div class="flex gap-1.5">
+                                <button onclick="generateAIMenu('มื้อเที่ยง')" class="text-[10px] bg-blue-900 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเที่ยง</button>
+                                <button onclick="generateAIMenu('มื้อเย็น')" class="text-[10px] bg-blue-800 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเย็น</button>
+                            </div>
+                        </div>
+                        <div id="aiMenuBox" class="text-xs text-slate-600 bg-white p-3.5 rounded-2xl border border-blue-100/80 space-y-1">
+                            เลือกมื้อที่ต้องการให้ AI ช่วยคิดเมนูอร่อยไม่น่าเบื่อจากวัตถุดิบที่มี พร้อมคุมโควตาแคลอรีไม่ให้กระทบมื้อถัดไปครับ
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAGE 3: PROGRESS & WEIGHT -->
+                <div id="pageProgress" class="space-y-4 hidden">
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h3 class="text-xs font-bold text-slate-900">⚖️ บันทึกน้ำหนักวันนี้</h3>
+                        <div class="flex gap-2">
+                            <input type="number" step="0.1" id="inputWeightVal" placeholder="น้ำหนักปัจจุบัน (กก.)" class="flex-1 bg-slate-50 border border-slate-300/80 rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none">
+                            <button onclick="submitWeight()" class="bg-blue-900 text-white px-5 py-2.5 rounded-2xl text-xs font-semibold shadow-md">บันทึก</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+                        <h3 class="text-xs font-bold text-slate-900">🏃 บันทึกการออกกำลังกาย</h3>
+                        <div class="grid grid-cols-2 gap-2">
+                            <select id="exTypeSelect" class="bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs">
+                                <option value="running">วิ่ง (~10 kcal/นาที)</option>
+                                <option value="jumprope">กระโดดเชือก (~12 kcal/นาที)</option>
+                                <option value="situp">ซิทอัพ (~8 kcal/นาที)</option>
+                            </select>
+                            <input type="number" id="exMinutes" placeholder="ระยะเวลา (นาที)" class="bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs">
+                        </div>
+                        <button onclick="submitExercise()" class="w-full bg-blue-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">บันทึกออกกำลังกาย</button>
+                    </div>
+
+                    <div class="navy-gradient text-white p-5 rounded-3xl space-y-2 text-xs shadow-lg">
+                        <span class="font-bold text-blue-200 block border-b border-white/10 pb-2">📊 ติดตามความคืบหน้า</span>
+                        <div class="flex justify-between pt-1">
+                            <span class="text-slate-300">เริ่มทำตั้งแต่:</span>
+                            <span id="progStartDate" class="font-medium">-</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-300">เป้าหมาย:</span>
+                            <span id="progGoalText" class="font-medium">-</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <nav id="bottomNav" class="fixed bottom-0 sm:absolute inset-x-0 bg-white/90 backdrop-blur-md border-t border-slate-200/80 flex justify-around py-2.5 hidden z-40 rounded-t-3xl shadow-lg">
+            <button onclick="switchPage('dashboard')" id="navDashboard" class="flex flex-col items-center gap-1 text-blue-900 text-[10px] font-bold transition">
+                <span class="text-lg">🏠</span>
+                <span>หน้าหลัก</span>
+            </button>
+            <button onclick="switchPage('food')" id="navFood" class="flex flex-col items-center gap-1 text-slate-400 text-[10px] font-medium transition">
+                <span class="text-lg">🍲</span>
+                <span>บันทึกอาหาร</span>
+            </button>
+            <button onclick="switchPage('progress')" id="navProgress" class="flex flex-col items-center gap-1 text-slate-400 text-[10px] font-medium transition">
+                <span class="text-lg">📈</span>
+                <span>ความคืบหน้า</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- SCRIPT LOGIC -->
+    <script>
+        let currentProfile = null;
+        let selectedBatchFoods = [];
+        let todayItems = [];
+
+        let foodDatabase = [
+            { name: "อกไก่", calPerUnit: 1.65, unit: "g" },
+            { name: "ข้าวสวย", calPerUnit: 1.30, unit: "g" },
+            { name: "ไข่ต้ม", calPerUnit: 1.55, unit: "g" },
+            { name: "ฟักทอง", calPerUnit: 0.26, unit: "g" },
+            { name: "เต้าหู้ไข่", calPerUnit: 0.70, unit: "g" },
+            { name: "วุ้นเส้น (ต้ม)", calPerUnit: 0.80, unit: "g" },
+            { name: "น้ำเต้าหู้ (ไม่หวาน)", calPerUnit: 0.35, unit: "ml" },
+            { name: "อเมริกาโน่ (ไม่หวาน)", calPerUnit: 0.05, unit: "ml" }
+        ];
+
+        window.onload = function() {
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('selectDate').value = todayStr;
+
+            populateFoodDropdown();
+
+            const savedUser = localStorage.getItem('fitnavy_username');
+            if (savedUser) {
+                document.getElementById('loginUsername').value = savedUser;
+                handleLogin();
+            }
+        };
+
+        function switchAuthTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.remove('hidden');
+                document.getElementById('registerForm').classList.add('hidden');
+                document.getElementById('tabLoginBtn').className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-900 text-white transition shadow-md";
+                document.getElementById('tabRegisterBtn').className = "flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition";
+            } else {
+                document.getElementById('loginForm').classList.add('hidden');
+                document.getElementById('registerForm').classList.remove('hidden');
+                document.getElementById('tabRegisterBtn').className = "flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-900 text-white transition shadow-md";
+                document.getElementById('tabLoginBtn').className = "flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition";
+            }
+        }
+
+        function toggleGoalFields() {
+            const goal = document.getElementById('regGoal').value;
+            const group = document.getElementById('loseGoalGroup');
+            if (goal === 'lose') {
+                group.classList.remove('hidden');
+            } else {
+                group.classList.add('hidden');
+            }
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const errBox = document.getElementById('loginError');
+            const btn = document.getElementById('btnLoginSubmit');
+            errBox.classList.add('hidden');
+
+            if (!username) { alert('กรุณากรอกชื่อผู้ใช้งาน'); return; }
+
+            btn.innerText = "กำลังเข้าสู่ระบบ...";
+            btn.disabled = true;
+
+            google.script.run
+                .withSuccessHandler(function(res) {
+                    btn.innerText = "เข้าสู่ระบบ";
+                    btn.disabled = false;
+                    if (res && res.exists) {
+                        currentProfile = res.profile;
+                        localStorage.setItem('fitnavy_username', currentProfile.username);
+                        showApp();
+                    } else {
+                        errBox.classList.remove('hidden');
+                    }
+                })
+                .withFailureHandler(function(err) {
+                    btn.innerText = "เข้าสู่ระบบ";
+                    btn.disabled = false;
+                    alert("การเชื่อมต่อขัดข้อง: " + err);
+                })
+                .checkUserLogin(username);
+        }
+
+        function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            if (!username) { alert('กรุณาตั้งชื่อผู้ใช้งาน'); return; }
+
+            const age = document.getElementById('regAge').value;
+            const gender = document.getElementById('regGender').value;
+            const weight = document.getElementById('regWeight').value;
+            const height = document.getElementById('regHeight').value;
+            const goal = document.getElementById('regGoal').value;
+            const targetWeightLoss = document.getElementById('regTargetLoss').value || 0;
+            const targetCalories = document.getElementById('regTargetCalories').value || 1500;
+
+            const payload = { username, age, gender, weight, height, activity: "1.55", goal, targetWeightLoss, targetCalories };
+
+            google.script.run.withSuccessHandler(function(res) {
+                if (res && res.success) {
+                    currentProfile = res.profile;
+                    localStorage.setItem('fitnavy_username', currentProfile.username);
+                    showApp();
+                } else {
+                    alert(res ? res.message : "เกิดข้อผิดพลาด");
+                }
+            }).createNewProfile(payload);
+        }
+
+        function showApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('appSection').classList.remove('hidden');
+            document.getElementById('bottomNav').classList.remove('hidden');
+            document.getElementById('btnLogout').classList.remove('hidden');
+            document.getElementById('userDisplay').innerText = `ผู้ใช้งาน: ${currentProfile.username} (${currentProfile.targetCalories} kcal/วัน)`;
+
+            if (currentProfile.createdDate) {
+                const start = new Date(currentProfile.createdDate);
+                const now = new Date();
+                const diffDays = Math.max(1, Math.floor((now - start) / (1000 * 60 * 60 * 24)) + 1);
+                document.getElementById('dayCounter').innerText = `ทำมาแล้ว ${diffDays} วัน`;
+                document.getElementById('progStartDate').innerText = currentProfile.createdDate;
+            }
+
+            const goalStr = (currentProfile.goal === 'lose') ? `ลดน้ำหนัก ${currentProfile.targetWeightLoss} กก.` : 'รักษาน้ำหนัก';
+            document.getElementById('progGoalText').innerText = goalStr;
+
+            loadDashboardData();
+        }
+
+        function logout() {
+            localStorage.removeItem('fitnavy_username');
+            currentProfile = null;
+            document.getElementById('appSection').classList.add('hidden');
+            document.getElementById('bottomNav').classList.add('hidden');
+            document.getElementById('btnLogout').classList.add('hidden');
+            document.getElementById('authSection').classList.remove('hidden');
+            switchAuthTab('login');
+        }
+
+        function switchPage(page) {
+            document.getElementById('pageDashboard').classList.add('hidden');
+            document.getElementById('pageFood').classList.add('hidden');
+            document.getElementById('pageProgress').classList.add('hidden');
+
+            document.getElementById('navDashboard').className = "flex flex-col items-center gap-1 text-slate-400 text-[10px] font-medium transition";
+            document.getElementById('navFood').className = "flex flex-col items-center gap-1 text-slate-400 text-[10px] font-medium transition";
+            document.getElementById('navProgress').className = "flex flex-col items-center gap-1 text-slate-400 text-[10px] font-medium transition";
+
+            if (page === 'dashboard') {
+                document.getElementById('pageDashboard').classList.remove('hidden');
+                document.getElementById('navDashboard').className = "flex flex-col items-center gap-1 text-blue-900 font-bold text-[10px] transition";
+            } else if (page === 'food') {
+                document.getElementById('pageFood').classList.remove('hidden');
+                document.getElementById('navFood').className = "flex flex-col items-center gap-1 text-blue-900 font-bold text-[10px] transition";
+            } else if (page === 'progress') {
+                document.getElementById('pageProgress').classList.remove('hidden');
+                document.getElementById('navProgress').className = "flex flex-col items-center gap-1 text-blue-900 font-bold text-[10px] transition";
+            }
+        }
+
+        function loadDashboardData() {
+            if (!currentProfile) return;
+            const selectedDate = document.getElementById('selectDate').value;
+
+            google.script.run.withSuccessHandler(function(items) {
+                todayItems = items || [];
+                renderDashboard(todayItems);
+            }).getDailyData(currentProfile.username, selectedDate);
+        }
+
+        function renderDashboard(items) {
+            let totalEaten = 0;
+            let totalBurn = 0;
+            let hasWeight = false;
+            let meals = { "มื้อเช้า": false, "มื้อเที่ยง": false, "มื้อเย็น": false, "ของว่าง/เครื่องดื่ม": false };
+            let html = '';
+
+            items.forEach(item => {
+                if (item.type === 'food') {
+                    totalEaten += item.calories;
+                    if (item.detail.includes("มื้อเช้า")) meals["มื้อเช้า"] = true;
+                    if (item.detail.includes("มื้อเที่ยง")) meals["มื้อเที่ยง"] = true;
+                    if (item.detail.includes("มื้อเย็น")) meals["มื้อเย็น"] = true;
+                    if (item.detail.includes("ของว่าง")) meals["ของว่าง/เครื่องดื่ม"] = true;
+
+                    html += `
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center text-xs shadow-sm">
+                            <div>
+                                <span class="font-bold text-slate-900">${item.name}</span>
+                                <span class="text-slate-500 block text-[10px] font-light mt-0.5">${item.detail}</span>
+                            </div>
+                            <span class="text-rose-600 font-bold bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-100">-${item.calories} kcal</span>
+                        </div>`;
+                } else if (item.type === 'exercise') {
+                    totalBurn += item.calories;
+                    html += `
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center text-xs shadow-sm">
+                            <div>
+                                <span class="font-bold text-slate-900">🏃 ${item.name}</span>
+                                <span class="text-slate-500 block text-[10px] font-light mt-0.5">${item.detail}</span>
+                            </div>
+                            <span class="text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100">+${item.calories} kcal</span>
+                        </div>`;
+                } else if (item.type === 'weight') {
+                    hasWeight = true;
+                    html += `
+                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center text-xs shadow-sm">
+                            <div>
+                                <span class="font-bold text-slate-900">⚖️ บันทึกน้ำหนัก</span>
+                                <span class="text-slate-500 block text-[10px] font-light mt-0.5">น้ำหนักวันนี้</span>
+                            </div>
+                            <span class="text-blue-900 font-bold bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-100">${item.calories} กก.</span>
+                        </div>`;
+                }
+            });
+
+            if (items.length === 0) {
+                html = '<div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>';
+            }
+            document.getElementById('diaryList').innerHTML = html;
+
+            updateMealChecklist('chkBreakfast', meals["มื้อเช้า"], '🌅 มื้อเช้า');
+            updateMealChecklist('chkLunch', meals["มื้อเที่ยง"], '☀️ มื้อเที่ยง');
+            updateMealChecklist('chkDinner', meals["มื้อเย็น"], '🌙 มื้อเย็น');
+            updateMealChecklist('chkSnack', meals["ของว่าง/เครื่องดื่ม"], '☕ ของว่าง');
+
+            if (!hasWeight) {
+                document.getElementById('weightAlert').classList.remove('hidden');
+            } else {
+                document.getElementById('weightAlert').classList.add('hidden');
+            }
+
+            const target = Number(currentProfile.targetCalories);
+            const remaining = target + totalBurn - totalEaten;
+
+            document.getElementById('statTarget').innerText = target;
+            document.getElementById('statEaten').innerText = totalEaten;
+            document.getElementById('statBurn').innerText = totalBurn;
+            document.getElementById('statRemaining').innerText = remaining;
+
+            const compensateBox = document.getElementById('exerciseCompensateBox');
+            if (remaining < 0) {
+                const overCal = Math.abs(remaining);
+                const runMin = Math.ceil(overCal / 10);
+                const ropeMin = Math.ceil(overCal / 12);
+                document.getElementById('exCompensateText').innerText = `คุณทานเกินไป ${overCal} kcal! แนะนำออกกำลังกายชดเชย: วิ่ง ${runMin} นาที หรือ กระโดดเชือก ${ropeMin} นาที ครับ`;
+                compensateBox.classList.remove('hidden');
+            } else {
+                compensateBox.classList.add('hidden');
+            }
+
+            if (remaining < 350 && remaining >= 0) {
+                document.getElementById('badgeBuffer').classList.remove('hidden');
+            } else {
+                document.getElementById('badgeBuffer').classList.add('hidden');
+            }
+        }
+
+        function updateMealChecklist(elementId, isDone, title) {
+            const el = document.getElementById(elementId);
+            if (isDone) {
+                el.className = "py-2.5 px-1 rounded-2xl border border-emerald-300 bg-emerald-50 text-emerald-800 font-bold shadow-sm";
+                el.innerText = `✓ ${title}`;
+            } else {
+                el.className = "py-2.5 px-1 rounded-2xl border border-slate-200/80 bg-slate-50 text-slate-400";
+                el.innerText = title;
+            }
+        }
+
+        function populateFoodDropdown() {
+            const select = document.getElementById('foodSelect');
+            select.innerHTML = '';
+            foodDatabase.forEach((food, idx) => {
+                select.innerHTML += `<option value="${idx}">${food.name} (${food.unit})</option>`;
+            });
+            updateUnitLabel();
+        }
+
+        function updateUnitLabel() {
+            const idx = document.getElementById('foodSelect').value;
+            const food = foodDatabase[idx];
+            document.getElementById('labelAmount').innerText = `ปริมาณ (${food.unit})`;
+        }
+
+        function toggleCustomFoodForm() {
+            document.getElementById('customFoodForm').classList.toggle('hidden');
+        }
+
+        function addNewCustomFood() {
+            const name = document.getElementById('newFoodName').value.trim();
+            const cal = parseFloat(document.getElementById('newFoodCal').value);
+            const unit = document.getElementById('newFoodUnit').value;
+
+            if (!name || isNaN(cal) || cal <= 0) {
+                alert('กรุณากรอกข้อมูลอาหารให้ครบถ้วน');
+                return;
+            }
+
+            foodDatabase.push({ name, calPerUnit: cal, unit });
+            populateFoodDropdown();
+            document.getElementById('newFoodName').value = '';
+            document.getElementById('newFoodCal').value = '';
+            toggleCustomFoodForm();
+            alert(`เพิ่ม ${name} เข้าคลังแล้วครับ`);
+        }
+
+        function addFoodToBatch() {
+            const idx = document.getElementById('foodSelect').value;
+            const amount = parseFloat(document.getElementById('foodAmount').value);
+
+            if (isNaN(amount) || amount <= 0) {
+                alert('กรุณาระบุปริมาณที่ถูกต้อง');
+                return;
+            }
+
+            const food = foodDatabase[idx];
+            const totalCal = Math.round(food.calPerUnit * amount);
+
+            selectedBatchFoods.push({
+                name: food.name,
+                amount: amount,
+                unit: food.unit,
+                calories: totalCal
+            });
+
+            document.getElementById('foodAmount').value = '';
+            renderBatchList();
+        }
+
+        function renderBatchList() {
+            const box = document.getElementById('batchFoodList');
+            if (selectedBatchFoods.length === 0) {
+                box.innerHTML = '<div class="text-center text-slate-400 py-3">ยังไม่ได้เลือกรายการ</div>';
+                return;
+            }
+
+            let html = '';
+            selectedBatchFoods.forEach((item, index) => {
+                html += `
+                    <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border border-slate-200">
+                        <span>${item.name} (${item.amount} ${item.unit})</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-rose-600">${item.calories} kcal</span>
+                            <button onclick="selectedBatchFoods.splice(${index},1); renderBatchList();" class="text-slate-400 font-bold px-1">✕</button>
+                        </div>
+                    </div>`;
+            });
+            box.innerHTML = html;
+        }
+
+        function submitBatchFood() {
+            if (selectedBatchFoods.length === 0) {
+                alert('กรุณาเลือกรายการอาหารก่อนครับ');
+                return;
+            }
+
+            const mealType = document.getElementById('foodMealType').value;
+            const selectedDate = document.getElementById('selectDate').value;
+
+            const payloadList = selectedBatchFoods.map(item => ({
+                username: currentProfile.username,
+                date: selectedDate,
+                type: 'food',
+                name: item.name,
+                calories: item.calories,
+                detail: `${mealType} (${item.amount} ${item.unit})`
+            }));
+
+            google.script.run.withSuccessHandler(function(res) {
+                if (res && res.success) {
+                    selectedBatchFoods = [];
+                    renderBatchList();
+                    switchPage('dashboard');
+                    loadDashboardData();
+                }
+            }).saveBatchData(payloadList);
+        }
+
+        function generateAIMenu(mealTarget) {
+            let eaten = 0;
+            todayItems.forEach(i => { if (i.type === 'food') eaten += i.calories; });
+            let remaining = Number(currentProfile.targetCalories) - eaten;
+
+            let allowedCal = remaining;
+            if (mealTarget === 'มื้อเที่ยง' && remaining > 350) {
+                allowedCal = remaining - 350;
+            }
+
+            const creativeMenus = [
+                { name: "สุกี้แห้งอกไก่ใส่วุ้นเส้น & เต้าหู้ไข่", cal: 280, recipe: "ผัดอกไก่ 100g กับวุ้นเส้นต้ม 50g และเต้าหู้ไข่ 1/2 หลอด ใส่น้ำจิ้มสุกี้โซเดียมต่ำ" },
+                { name: "ต้มยำอกไก่น้ำใสใส่ฟักทอง & เห็ด", cal: 210, recipe: "ต้มอกไก่ 100g พร้อมฟักทองหั่นชิ้น 100g ปรุงด้วยมะนาว พริกสด และน้ำปลาลดโซเดียม" },
+                { name: "ไข่ต้มทรงเครื่อง + น้ำเต้าหู้ไม่หวาน", cal: 240, recipe: "ไข่ต้ม 2 ฟอง ทานคู่กับน้ำเต้าหู้ไม่หวาน 250 ml อิ่มท้อง ได้โปรตีนสูง" },
+                { name: "แกงจืดเต้าหู้ไข่ใส่วุ้นเส้น & อกไก่สับ", cal: 220, recipe: "ซุปใสรสกลมกล่อม ใส่เต้าหู้ไข่ 1 หลอด อกไก่สับ 80g และวุ้นเส้น 40g" }
+            ];
+
+            const choice = creativeMenus[Math.floor(Math.random() * creativeMenus.length)];
+
+            document.getElementById('aiMenuBox').innerHTML = `
+                <div class="space-y-1">
+                    <span class="font-bold text-blue-900 block">✨ เมนูแนะนำ (${mealTarget}): ${choice.name} (~${choice.cal} kcal)</span>
+                    <p class="text-[11px] text-slate-600 block leading-relaxed">🍳 <b>สูตรทำง่าย:</b> ${choice.recipe}</p>
+                    <span class="text-[10px] text-emerald-700 font-semibold block">โควตาที่แนะนำมื้อนี้ไม่เกิน: ${allowedCal} kcal</span>
+                </div>
+            `;
+        }
+
+        function submitWeight() {
+            const w = parseFloat(document.getElementById('inputWeightVal').value);
+            const date = document.getElementById('selectDate').value;
+            if (isNaN(w) || w <= 0) { alert('กรุณากรอกน้ำหนักให้ถูกต้อง'); return; }
+
+            const payload = [{
+                username: currentProfile.username,
+                date: date,
+                type: 'weight',
+                name: 'บันทึกน้ำหนักตัว',
+                calories: w,
+                detail: 'น้ำหนักประจำวัน'
+            }];
+
+            google.script.run.withSuccessHandler(function(res) {
+                if (res && res.success) {
+                    document.getElementById('inputWeightVal').value = '';
+                    switchPage('dashboard');
+                    loadDashboardData();
+                }
+            }).saveBatchData(payload);
+        }
+
+        function submitExercise() {
+            const exType = document.getElementById('exTypeSelect').value;
+            const min = parseFloat(document.getElementById('exMinutes').value);
+            const date = document.getElementById('selectDate').value;
+
+            if (isNaN(min) || min <= 0) { alert('กรุณากรอกระยะเวลาออกกำลังกาย'); return; }
+
+            let exName = 'วิ่ง'; let calMin = 10;
+            if (exType === 'jumprope') { exName = 'กระโดดเชือก'; calMin = 12; }
+            if (exType === 'situp') { exName = 'ซิทอัพ'; calMin = 8; }
+
+            const payload = [{
+                username: currentProfile.username,
+                date: date,
+                type: 'exercise',
+                name: exName,
+                calories: Math.round(calMin * min),
+                detail: `ออกกำลังกาย ${min} นาที`
+            }];
+
+            google.script.run.withSuccessHandler(function(res) {
+                if (res && res.success) {
+                    document.getElementById('exMinutes').value = '';
+                    switchPage('dashboard');
+                    loadDashboardData();
+                }
+            }).saveBatchData(payload);
+        }
+    </script>
+</body>
+</html>
