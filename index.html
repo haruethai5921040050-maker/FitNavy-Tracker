@@ -183,8 +183,33 @@
                 <div id="pageFood" class="space-y-4 hidden">
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3.5">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร (ดึงข้อมูลจาก Google Sheets)</h3>
-                            <button onclick="loadFoodLibrary()" class="text-[11px] text-blue-800 underline font-semibold">🔄 โหลดคลังเมนูใหม่</button>
+                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร</h3>
+                            <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เพิ่มเมนูใหม่</button>
+                        </div>
+
+                        <!-- CUSTOM FOOD FORM -->
+                        <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2.5 text-xs">
+                            <span class="font-bold text-blue-950 block">เพิ่มเมนูใหม่เข้า Google Sheets</span>
+                            <div>
+                                <label class="block text-[11px] text-slate-600 mb-1">ชื่อเมนูอาหาร</label>
+                                <input type="text" id="newFoodName" placeholder="เช่น อกไก่ต้ม..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[11px] text-slate-600 mb-1">แคลอรีต่อหน่วย</label>
+                                    <input type="number" step="0.01" id="newFoodCal" placeholder="เช่น 1.65 หรือ 350" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-600 mb-1">หน่วยนับ</label>
+                                    <select id="newFoodUnit" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-2 text-xs">
+                                        <option value="g">ต่อ 1 กรัม (g)</option>
+                                        <option value="ml">ต่อ 1 มล. (ml)</option>
+                                        <option value="จาน">ต่อ 1 จาน / ชาม</option>
+                                        <option value="ชิ้น">ต่อ 1 ชิ้น</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="addNewCustomFood()" class="w-full bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-xl font-medium">บันทึกเข้า Google Sheets</button>
                         </div>
 
                         <div>
@@ -318,7 +343,6 @@
         let selectedBatchFoods = [];
         let todayItems = [];
         
-        // คลังอาหารสำรองภายใน (Fallback) เพื่อให้เว็บเปิดได้ทันทีโดยไม่ต้องรอโหลดจาก Google Sheets นาน
         let foodDatabase = [
             { name: "ฟักทองนึ่ง", calPerUnit: 0.50, unit: "g" },
             { name: "เห็ดเข็มทองนึ่ง", calPerUnit: 0.35, unit: "g" },
@@ -336,14 +360,12 @@
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('selectDate').value = todayStr;
 
-            // ตรวจสอบการเข้าสู่ระบบทันที (ไม่บล็อกด้วยการโหลดคลังอาหาร)
             const savedUser = localStorage.getItem('fitnavy_username');
             if (savedUser) {
                 document.getElementById('loginUsername').value = savedUser;
                 handleLoginSilent(savedUser);
             }
 
-            // โหลดคลังอาหารจาก Google Sheets แบบเบื้องหลัง (Background Load) ไม่ให้หน่วงหน้าเว็บ
             setTimeout(loadFoodLibrary, 500);
         };
 
@@ -354,6 +376,49 @@
                     foodDatabase = res;
                 }
             } catch(e) {}
+        }
+
+        function toggleCustomFoodForm() {
+            document.getElementById('customFoodForm').classList.toggle('hidden');
+        }
+
+        async function addNewCustomFood() {
+            const name = document.getElementById('newFoodName').value.trim();
+            const calPerUnit = parseFloat(document.getElementById('newFoodCal').value);
+            const unit = document.getElementById('newFoodUnit').value;
+
+            if (!name || isNaN(calPerUnit) || calPerUnit <= 0) {
+                showModal("แจ้งเตือน", "กรุณากรอกชื่อและแคลอรีให้ถูกต้องครับ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+                return;
+            }
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        action: "addCustomFood",
+                        payload: { name, calPerUnit, unit }
+                    })
+                }).then(r => r.json());
+
+                if (res && res.success) {
+                    foodDatabase.push({ name, calPerUnit, unit });
+                    document.getElementById('newFoodName').value = '';
+                    document.getElementById('newFoodCal').value = '';
+                    toggleCustomFoodForm();
+
+                    showModal(
+                        "✅ สำเร็จ",
+                        `เพิ่มเมนู "${name}" เข้า Google Sheets เรียบร้อยแล้วครับ!`,
+                        "🍲",
+                        `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`
+                    );
+                } else {
+                    alert("บันทึกไม่สำเร็จ");
+                }
+            } catch(e) {
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+            }
         }
 
         function showModal(title, message, icon, buttonsHTML) {
