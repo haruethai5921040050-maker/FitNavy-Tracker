@@ -16,7 +16,7 @@
 
     <div class="w-full max-w-md bg-slate-50 min-h-screen sm:min-h-[850px] sm:rounded-[36px] shadow-2xl flex flex-col overflow-hidden border border-slate-200/80 relative pb-20">
         
-        <!-- APP HEADER -->
+        <!-- HEADER -->
         <header class="navy-gradient text-white px-6 pt-5 pb-4 flex justify-between items-center shadow-lg relative z-20">
             <div>
                 <div class="flex items-center gap-2">
@@ -26,27 +26,18 @@
                 <p id="userDisplay" class="text-[11px] text-blue-200/90 font-light mt-0.5">ระบบติดตามแคลอรีอัจฉริยะ</p>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="loadDashboardData()" title="รีเฟรชข้อมูล" class="p-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-full transition border border-white/10 text-xs">
-                    🔄
-                </button>
-                <button id="btnLogout" onclick="logout()" class="hidden text-xs bg-red-500/80 hover:bg-red-500 text-white px-3 py-1.5 rounded-full border border-red-400/30 font-medium transition shadow-sm">
-                    ออก
-                </button>
+                <button onclick="loadDashboardData()" title="รีเฟรชข้อมูล" class="p-2 bg-white/10 hover:bg-white/20 active:scale-95 text-white rounded-full transition border border-white/10 text-xs">🔄</button>
+                <button id="btnLogout" onclick="logout()" class="hidden text-xs bg-red-500/80 hover:bg-red-500 text-white px-3 py-1.5 rounded-full border border-red-400/30 font-medium transition shadow-sm">ออก</button>
             </div>
         </header>
 
         <!-- MAIN CONTENT AREA -->
         <main class="flex-1 overflow-y-auto px-4 py-5 space-y-4">
             
-            <!-- AUTHENTICATION -->
             <div id="authSection" class="space-y-5 pt-2">
                 <div class="flex bg-slate-200/80 p-1.5 rounded-2xl border border-slate-300/60">
-                    <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-900 text-white transition shadow-md">
-                        เข้าสู่ระบบ
-                    </button>
-                    <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition">
-                        สร้างโปรไฟล์ใหม่
-                    </button>
+                    <button id="tabLoginBtn" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-xs font-bold rounded-xl bg-slate-900 text-white transition shadow-md">เข้าสู่ระบบ</button>
+                    <button id="tabRegisterBtn" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 transition">สร้างโปรไฟล์ใหม่</button>
                 </div>
 
                 <!-- LOGIN FORM -->
@@ -59,12 +50,8 @@
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
                         <input type="text" id="loginUsername" placeholder="เช่น john_navy" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800/30 focus:border-blue-800 transition">
                     </div>
-                    <div id="loginError" class="text-xs text-rose-600 font-medium hidden text-center bg-rose-50 p-3 rounded-2xl border border-rose-200/80">
-                        ❌ ไม่พบชื่อนี้ในระบบ รบกวนกดสร้างโปรไฟล์ใหม่ก่อนนะครับ
-                    </div>
-                    <button id="btnLoginSubmit" onclick="handleLogin()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-lg shadow-blue-900/20 text-sm">
-                        เข้าสู่ระบบ
-                    </button>
+                    <div id="loginError" class="text-xs text-rose-600 font-medium hidden text-center bg-rose-50 p-3 rounded-2xl border border-rose-200/80">❌ ไม่พบชื่อนี้ในระบบ รบกวนกดสร้างโปรไฟล์ใหม่ก่อนครับ</div>
+                    <button id="btnLoginSubmit" onclick="handleLogin()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-lg shadow-blue-900/20 text-sm">เข้าสู่ระบบ</button>
                 </div>
 
                 <!-- REGISTER FORM -->
@@ -120,15 +107,12 @@
                         <input type="number" id="regTargetCalories" value="1500" class="w-full bg-blue-50/80 border border-blue-300 rounded-xl px-3.5 py-2 text-xs font-bold text-blue-900">
                     </div>
 
-                    <button onclick="handleRegister()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-sm mt-1">
-                        บันทึกโปรไฟล์
-                    </button>
+                    <button onclick="handleRegister()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-sm mt-1">บันทึกโปรไฟล์</button>
                 </div>
             </div>
 
             <!-- MAIN APP SECTION -->
             <div id="appSection" class="hidden space-y-4">
-                
                 <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm flex justify-between items-center text-xs">
                     <div class="flex items-center gap-2 font-bold text-slate-800">
                         <span>📅</span>
@@ -229,8 +213,7 @@
                         <div class="grid grid-cols-3 gap-2">
                             <div class="col-span-2">
                                 <label class="block text-xs font-medium text-slate-600 mb-1">เลือกรายการอาหาร</label>
-                                <select id="foodSelect" onchange="updateUnitLabel()" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none">
-                                </select>
+                                <select id="foodSelect" onchange="updateUnitLabel()" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none"></select>
                             </div>
                             <div>
                                 <label id="labelAmount" class="block text-xs font-medium text-slate-600 mb-1">ปริมาณ</label>
@@ -238,9 +221,7 @@
                             </div>
                         </div>
 
-                        <button onclick="addFoodToBatch()" class="w-full bg-blue-800 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-semibold py-2.5 rounded-2xl transition">
-                            + ใส่ในรายการมื้อนี้
-                        </button>
+                        <button onclick="addFoodToBatch()" class="w-full bg-blue-800 hover:bg-blue-700 active:scale-[0.98] text-white text-xs font-semibold py-2.5 rounded-2xl transition">+ ใส่ในรายการมื้อนี้</button>
 
                         <div class="space-y-1.5 pt-2 border-t border-slate-100">
                             <span class="text-xs font-bold text-slate-600 block">รายการมื้อนี้เตรียมบันทึก:</span>
@@ -249,9 +230,7 @@
                             </div>
                         </div>
 
-                        <button onclick="submitBatchFood()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-xs">
-                            บันทึกมื้ออาหารทั้งหมด
-                        </button>
+                        <button onclick="submitBatchFood()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-xs">บันทึกมื้ออาหารทั้งหมด</button>
                     </div>
 
                     <div class="bg-blue-50/80 p-4 rounded-3xl border border-blue-100 space-y-2.5">
@@ -262,9 +241,7 @@
                                 <button onclick="generateAIMenu('มื้อเย็น')" class="text-[10px] bg-blue-800 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเย็น</button>
                             </div>
                         </div>
-                        <div id="aiMenuBox" class="text-xs text-slate-600 bg-white p-3.5 rounded-2xl border border-blue-100/80 space-y-1">
-                            เลือกมื้อที่ต้องการให้ AI ช่วยคิดเมนูอร่อยไม่น่าเบื่อจากวัตถุดิบที่มี พร้อมคุมโควตาแคลอรีไม่ให้กระทบมื้อถัดไปครับ
-                        </div>
+                        <div id="aiMenuBox" class="text-xs text-slate-600 bg-white p-3.5 rounded-2xl border border-blue-100/80 space-y-1">เลือกมื้อที่ต้องการให้ AI ช่วยคิดเมนูอร่อยไม่น่าเบื่อจากวัตถุดิบที่มี พร้อมคุมโควตาแคลอรีไม่ให้กระทบมื้อถัดไปครับ</div>
                     </div>
                 </div>
 
@@ -327,6 +304,9 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
+        // 🚨 วาง WEB APP URL ของคุณตรงนี้ครับ 🚨
+        const API_URL = "https://script.google.com/macros/s/AKfycbxlMe7tYUbCRht7IFU7H-i3TAFSO_JldCotHGt_I59HmseqOGn59RjhJHgGjQ52xvC8KA/exec";
+
         let currentProfile = null;
         let selectedBatchFoods = [];
         let todayItems = [];
@@ -345,7 +325,6 @@
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('selectDate').value = todayStr;
-
             populateFoodDropdown();
 
             const savedUser = localStorage.getItem('fitnavy_username');
@@ -372,14 +351,10 @@
         function toggleGoalFields() {
             const goal = document.getElementById('regGoal').value;
             const group = document.getElementById('loseGoalGroup');
-            if (goal === 'lose') {
-                group.classList.remove('hidden');
-            } else {
-                group.classList.add('hidden');
-            }
+            if (goal === 'lose') { group.classList.remove('hidden'); } else { group.classList.add('hidden'); }
         }
 
-        function handleLogin() {
+        async function handleLogin() {
             const username = document.getElementById('loginUsername').value.trim();
             const errBox = document.getElementById('loginError');
             const btn = document.getElementById('btnLoginSubmit');
@@ -390,27 +365,26 @@
             btn.innerText = "กำลังเข้าสู่ระบบ...";
             btn.disabled = true;
 
-            google.script.run
-                .withSuccessHandler(function(res) {
-                    btn.innerText = "เข้าสู่ระบบ";
-                    btn.disabled = false;
-                    if (res && res.exists) {
-                        currentProfile = res.profile;
-                        localStorage.setItem('fitnavy_username', currentProfile.username);
-                        showApp();
-                    } else {
-                        errBox.classList.remove('hidden');
-                    }
-                })
-                .withFailureHandler(function(err) {
-                    btn.innerText = "เข้าสู่ระบบ";
-                    btn.disabled = false;
-                    alert("การเชื่อมต่อขัดข้อง: " + err);
-                })
-                .checkUserLogin(username);
+            try {
+                const res = await fetch(`${API_URL}?action=checkUser&username=${encodeURIComponent(username)}`).then(r => r.json());
+                btn.innerText = "เข้าสู่ระบบ";
+                btn.disabled = false;
+
+                if (res && res.exists) {
+                    currentProfile = res.profile;
+                    localStorage.setItem('fitnavy_username', currentProfile.username);
+                    showApp();
+                } else {
+                    errBox.classList.remove('hidden');
+                }
+            } catch(e) {
+                btn.innerText = "เข้าสู่ระบบ";
+                btn.disabled = false;
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
+            }
         }
 
-        function handleRegister() {
+        async function handleRegister() {
             const username = document.getElementById('regUsername').value.trim();
             if (!username) { alert('กรุณาตั้งชื่อผู้ใช้งาน'); return; }
 
@@ -424,7 +398,12 @@
 
             const payload = { username, age, gender, weight, height, activity: "1.55", goal, targetWeightLoss, targetCalories };
 
-            google.script.run.withSuccessHandler(function(res) {
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "register", payload: payload })
+                }).then(r => r.json());
+
                 if (res && res.success) {
                     currentProfile = res.profile;
                     localStorage.setItem('fitnavy_username', currentProfile.username);
@@ -432,7 +411,7 @@
                 } else {
                     alert(res ? res.message : "เกิดข้อผิดพลาด");
                 }
-            }).createNewProfile(payload);
+            } catch(e) { alert("เชื่อมต่อขัดข้อง"); }
         }
 
         function showApp() {
@@ -487,14 +466,15 @@
             }
         }
 
-        function loadDashboardData() {
+        async function loadDashboardData() {
             if (!currentProfile) return;
             const selectedDate = document.getElementById('selectDate').value;
 
-            google.script.run.withSuccessHandler(function(items) {
+            try {
+                const items = await fetch(`${API_URL}?action=getDaily&username=${encodeURIComponent(currentProfile.username)}&date=${selectedDate}`).then(r => r.json());
                 todayItems = items || [];
                 renderDashboard(todayItems);
-            }).getDailyData(currentProfile.username, selectedDate);
+            } catch(e) {}
         }
 
         function renderDashboard(items) {
@@ -543,9 +523,7 @@
                 }
             });
 
-            if (items.length === 0) {
-                html = '<div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>';
-            }
+            if (items.length === 0) html = '<div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>';
             document.getElementById('diaryList').innerHTML = html;
 
             updateMealChecklist('chkBreakfast', meals["มื้อเช้า"], '🌅 มื้อเช้า');
@@ -553,11 +531,7 @@
             updateMealChecklist('chkDinner', meals["มื้อเย็น"], '🌙 มื้อเย็น');
             updateMealChecklist('chkSnack', meals["ของว่าง/เครื่องดื่ม"], '☕ ของว่าง');
 
-            if (!hasWeight) {
-                document.getElementById('weightAlert').classList.remove('hidden');
-            } else {
-                document.getElementById('weightAlert').classList.add('hidden');
-            }
+            if (!hasWeight) { document.getElementById('weightAlert').classList.remove('hidden'); } else { document.getElementById('weightAlert').classList.add('hidden'); }
 
             const target = Number(currentProfile.targetCalories);
             const remaining = target + totalBurn - totalEaten;
@@ -570,19 +544,11 @@
             const compensateBox = document.getElementById('exerciseCompensateBox');
             if (remaining < 0) {
                 const overCal = Math.abs(remaining);
-                const runMin = Math.ceil(overCal / 10);
-                const ropeMin = Math.ceil(overCal / 12);
-                document.getElementById('exCompensateText').innerText = `คุณทานเกินไป ${overCal} kcal! แนะนำออกกำลังกายชดเชย: วิ่ง ${runMin} นาที หรือ กระโดดเชือก ${ropeMin} นาที ครับ`;
+                document.getElementById('exCompensateText').innerText = `คุณทานเกินไป ${overCal} kcal! แนะนำออกกำลังกายชดเชย: วิ่ง ${Math.ceil(overCal / 10)} นาที หรือ กระโดดเชือก ${Math.ceil(overCal / 12)} นาที ครับ`;
                 compensateBox.classList.remove('hidden');
-            } else {
-                compensateBox.classList.add('hidden');
-            }
+            } else { compensateBox.classList.add('hidden'); }
 
-            if (remaining < 350 && remaining >= 0) {
-                document.getElementById('badgeBuffer').classList.remove('hidden');
-            } else {
-                document.getElementById('badgeBuffer').classList.add('hidden');
-            }
+            if (remaining < 350 && remaining >= 0) { document.getElementById('badgeBuffer').classList.remove('hidden'); } else { document.getElementById('badgeBuffer').classList.add('hidden'); }
         }
 
         function updateMealChecklist(elementId, isDone, title) {
@@ -611,19 +577,14 @@
             document.getElementById('labelAmount').innerText = `ปริมาณ (${food.unit})`;
         }
 
-        function toggleCustomFoodForm() {
-            document.getElementById('customFoodForm').classList.toggle('hidden');
-        }
+        function toggleCustomFoodForm() { document.getElementById('customFoodForm').classList.toggle('hidden'); }
 
         function addNewCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
             const cal = parseFloat(document.getElementById('newFoodCal').value);
             const unit = document.getElementById('newFoodUnit').value;
 
-            if (!name || isNaN(cal) || cal <= 0) {
-                alert('กรุณากรอกข้อมูลอาหารให้ครบถ้วน');
-                return;
-            }
+            if (!name || isNaN(cal) || cal <= 0) { alert('กรุณากรอกข้อมูลอาหารให้ครบถ้วน'); return; }
 
             foodDatabase.push({ name, calPerUnit: cal, unit });
             populateFoodDropdown();
@@ -637,21 +598,10 @@
             const idx = document.getElementById('foodSelect').value;
             const amount = parseFloat(document.getElementById('foodAmount').value);
 
-            if (isNaN(amount) || amount <= 0) {
-                alert('กรุณาระบุปริมาณที่ถูกต้อง');
-                return;
-            }
+            if (isNaN(amount) || amount <= 0) { alert('กรุณาระบุปริมาณที่ถูกต้อง'); return; }
 
             const food = foodDatabase[idx];
-            const totalCal = Math.round(food.calPerUnit * amount);
-
-            selectedBatchFoods.push({
-                name: food.name,
-                amount: amount,
-                unit: food.unit,
-                calories: totalCal
-            });
-
+            selectedBatchFoods.push({ name: food.name, amount: amount, unit: food.unit, calories: Math.round(food.calPerUnit * amount) });
             document.getElementById('foodAmount').value = '';
             renderBatchList();
         }
@@ -677,11 +627,8 @@
             box.innerHTML = html;
         }
 
-        function submitBatchFood() {
-            if (selectedBatchFoods.length === 0) {
-                alert('กรุณาเลือกรายการอาหารก่อนครับ');
-                return;
-            }
+        async function submitBatchFood() {
+            if (selectedBatchFoods.length === 0) { alert('กรุณาเลือกรายการอาหารก่อนครับ'); return; }
 
             const mealType = document.getElementById('foodMealType').value;
             const selectedDate = document.getElementById('selectDate').value;
@@ -695,14 +642,19 @@
                 detail: `${mealType} (${item.amount} ${item.unit})`
             }));
 
-            google.script.run.withSuccessHandler(function(res) {
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveBatch", payload: payloadList })
+                }).then(r => r.json());
+
                 if (res && res.success) {
                     selectedBatchFoods = [];
                     renderBatchList();
                     switchPage('dashboard');
                     loadDashboardData();
                 }
-            }).saveBatchData(payloadList);
+            } catch(e) {}
         }
 
         function generateAIMenu(mealTarget) {
@@ -711,15 +663,12 @@
             let remaining = Number(currentProfile.targetCalories) - eaten;
 
             let allowedCal = remaining;
-            if (mealTarget === 'มื้อเที่ยง' && remaining > 350) {
-                allowedCal = remaining - 350;
-            }
+            if (mealTarget === 'มื้อเที่ยง' && remaining > 350) allowedCal = remaining - 350;
 
             const creativeMenus = [
-                { name: "สุกี้แห้งอกไก่ใส่วุ้นเส้น & เต้าหู้ไข่", cal: 280, recipe: "ผัดอกไก่ 100g กับวุ้นเส้นต้ม 50g และเต้าหู้ไข่ 1/2 หลอด ใส่น้ำจิ้มสุกี้โซเดียมต่ำ" },
-                { name: "ต้มยำอกไก่น้ำใสใส่ฟักทอง & เห็ด", cal: 210, recipe: "ต้มอกไก่ 100g พร้อมฟักทองหั่นชิ้น 100g ปรุงด้วยมะนาว พริกสด และน้ำปลาลดโซเดียม" },
-                { name: "ไข่ต้มทรงเครื่อง + น้ำเต้าหู้ไม่หวาน", cal: 240, recipe: "ไข่ต้ม 2 ฟอง ทานคู่กับน้ำเต้าหู้ไม่หวาน 250 ml อิ่มท้อง ได้โปรตีนสูง" },
-                { name: "แกงจืดเต้าหู้ไข่ใส่วุ้นเส้น & อกไก่สับ", cal: 220, recipe: "ซุปใสรสกลมกล่อม ใส่เต้าหู้ไข่ 1 หลอด อกไก่สับ 80g และวุ้นเส้น 40g" }
+                { name: "สุกี้แห้งอกไก่ใส่วุ้นเส้น & เต้าหู้ไข่", cal: 280, recipe: "ผัดอกไก่ 100g กับวุ้นเส้นต้ม 50g และเต้าหู้ไข่ 1/2 หลอด" },
+                { name: "ต้มยำอกไก่น้ำใสใส่ฟักทอง & เห็ด", cal: 210, recipe: "ต้มอกไก่ 100g พร้อมฟักทองหั่นชิ้น 100g" },
+                { name: "ไข่ต้มทรงเครื่อง + น้ำเต้าหู้ไม่หวาน", cal: 240, recipe: "ไข่ต้ม 2 ฟอง ทานคู่กับน้ำเต้าหู้ไม่หวาน 250 ml" }
             ];
 
             const choice = creativeMenus[Math.floor(Math.random() * creativeMenus.length)];
@@ -728,35 +677,33 @@
                 <div class="space-y-1">
                     <span class="font-bold text-blue-900 block">✨ เมนูแนะนำ (${mealTarget}): ${choice.name} (~${choice.cal} kcal)</span>
                     <p class="text-[11px] text-slate-600 block leading-relaxed">🍳 <b>สูตรทำง่าย:</b> ${choice.recipe}</p>
-                    <span class="text-[10px] text-emerald-700 font-semibold block">โควตาที่แนะนำมื้อนี้ไม่เกิน: ${allowedCal} kcal</span>
+                    <span class="text-[10px] text-emerald-700 font-semibold block">โควตามื้อนี้ไม่เกิน: ${allowedCal} kcal</span>
                 </div>
             `;
         }
 
-        function submitWeight() {
+        async function submitWeight() {
             const w = parseFloat(document.getElementById('inputWeightVal').value);
             const date = document.getElementById('selectDate').value;
             if (isNaN(w) || w <= 0) { alert('กรุณากรอกน้ำหนักให้ถูกต้อง'); return; }
 
-            const payload = [{
-                username: currentProfile.username,
-                date: date,
-                type: 'weight',
-                name: 'บันทึกน้ำหนักตัว',
-                calories: w,
-                detail: 'น้ำหนักประจำวัน'
-            }];
+            const payload = [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }];
 
-            google.script.run.withSuccessHandler(function(res) {
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveBatch", payload: payload })
+                }).then(r => r.json());
+
                 if (res && res.success) {
                     document.getElementById('inputWeightVal').value = '';
                     switchPage('dashboard');
                     loadDashboardData();
                 }
-            }).saveBatchData(payload);
+            } catch(e) {}
         }
 
-        function submitExercise() {
+        async function submitExercise() {
             const exType = document.getElementById('exTypeSelect').value;
             const min = parseFloat(document.getElementById('exMinutes').value);
             const date = document.getElementById('selectDate').value;
@@ -767,22 +714,20 @@
             if (exType === 'jumprope') { exName = 'กระโดดเชือก'; calMin = 12; }
             if (exType === 'situp') { exName = 'ซิทอัพ'; calMin = 8; }
 
-            const payload = [{
-                username: currentProfile.username,
-                date: date,
-                type: 'exercise',
-                name: exName,
-                calories: Math.round(calMin * min),
-                detail: `ออกกำลังกาย ${min} นาที`
-            }];
+            const payload = [{ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: Math.round(calMin * min), detail: `ออกกำลังกาย ${min} นาที` }];
 
-            google.script.run.withSuccessHandler(function(res) {
+            try {
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveBatch", payload: payload })
+                }).then(r => r.json());
+
                 if (res && res.success) {
                     document.getElementById('exMinutes').value = '';
                     switchPage('dashboard');
                     loadDashboardData();
                 }
-            }).saveBatchData(payload);
+            } catch(e) {}
         }
     </script>
 </body>
