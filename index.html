@@ -170,10 +170,10 @@
 
                     <div class="space-y-2.5">
                         <div class="flex justify-between items-center px-1">
-                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">📝 ประวัติวันนี้</h4>
-                            <span class="text-[10px] text-slate-400">เรียงตามเวลาล่าสุด</span>
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">📝 ประวัติวันนี้ (จัดกลุ่มตามมื้อ)</h4>
+                            <span class="text-[10px] text-slate-400">กดปุ่ม ✕ เพื่อลบรายการ</span>
                         </div>
-                        <div id="diaryList" class="space-y-2 min-h-[100px]">
+                        <div id="diaryList" class="space-y-3 min-h-[100px]">
                             <div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>
                         </div>
                     </div>
@@ -183,21 +183,35 @@
                 <div id="pageFood" class="space-y-4 hidden">
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3.5">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร (เลือกหลายรายการ)</h3>
-                            <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เมนูส่วนตัว</button>
+                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร (พิมพ์ค้นหาได้)</h3>
+                            <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เพิ่มเมนูส่วนตัว</button>
                         </div>
 
-                        <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2 text-xs">
-                            <span class="font-bold text-blue-950 block">เพิ่มเมนูส่วนตัวเข้าคลัง</span>
-                            <input type="text" id="newFoodName" placeholder="ชื่อเมนู (เช่น อกไก่ย่าง)" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
-                            <div class="grid grid-cols-2 gap-2">
-                                <input type="number" step="0.01" id="newFoodCal" placeholder="แคลอรีต่อ 1 หน่วย" class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
-                                <select id="newFoodUnit" class="bg-white border border-slate-300 rounded-xl px-2 py-2 text-xs">
-                                    <option value="g">ต่อ 1 กรัม (g)</option>
-                                    <option value="ml">ต่อ 1 มล. (ml)</option>
-                                </select>
+                        <!-- CUSTOM FOOD FORM (Support Dish & Smart AI Estimation) -->
+                        <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2.5 text-xs">
+                            <span class="font-bold text-blue-950 block">เพิ่มเมนูส่วนตัว (พิมพ์ชื่อระบบคิดแคลให้ทันที)</span>
+                            <div>
+                                <label class="block text-[11px] text-slate-600 mb-1">ชื่อเมนู (เช่น กะเพราไก่, ส้มตำไทย)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" id="newFoodName" placeholder="ชื่อเมนูอาหาร" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                    <button onclick="aiEstimateCustomFood()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-[11px] font-medium">🤖 ให้ AI คำนวณ</button>
+                                </div>
                             </div>
-                            <button onclick="addNewCustomFood()" class="w-full bg-blue-900 text-white py-2 rounded-xl font-medium">บันทึกเข้าคลัง</button>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[11px] text-slate-600 mb-1">แคลอรีต่อหน่วย/จาน</label>
+                                    <input type="number" step="0.01" id="newFoodCal" placeholder="เช่น 450" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-600 mb-1">หน่วยนับ</label>
+                                    <select id="newFoodUnit" class="w-full bg-white border border-slate-300 rounded-xl px-2 py-2 text-xs">
+                                        <option value="จาน">ต่อ 1 จาน / ชาม</option>
+                                        <option value="g">ต่อ 1 กรัม (g)</option>
+                                        <option value="ml">ต่อ 1 มล. (ml)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button onclick="addNewCustomFood()" class="w-full bg-blue-900 text-white py-2 rounded-xl font-medium">บันทึกเข้าคลังอาหาร</button>
                         </div>
 
                         <div>
@@ -211,13 +225,14 @@
                         </div>
 
                         <div class="grid grid-cols-3 gap-2">
-                            <div class="col-span-2">
-                                <label class="block text-xs font-medium text-slate-600 mb-1">เลือกรายการอาหาร</label>
-                                <select id="foodSelect" onchange="updateUnitLabel()" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none"></select>
+                            <div class="col-span-2 space-y-1">
+                                <label class="block text-xs font-medium text-slate-600">พิมพ์ค้นหาอาหาร</label>
+                                <input type="text" id="foodSearchInput" oninput="filterFoodDropdown()" placeholder="พิมพ์ชื่ออาหาร..." class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2 text-xs text-slate-800 focus:outline-none mb-1">
+                                <select id="foodSelect" size="1" onchange="updateUnitLabel()" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2 text-xs text-slate-800 focus:outline-none"></select>
                             </div>
                             <div>
                                 <label id="labelAmount" class="block text-xs font-medium text-slate-600 mb-1">ปริมาณ</label>
-                                <input type="number" id="foodAmount" placeholder="100" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none">
+                                <input type="number" id="foodAmount" placeholder="1" value="1" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none">
                             </div>
                         </div>
 
@@ -235,23 +250,27 @@
 
                     <div class="bg-blue-50/80 p-4 rounded-3xl border border-blue-100 space-y-2.5">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs font-bold text-blue-950 flex items-center gap-1">🤖 AI ช่วยคิดเมนูสร้างสรรค์</span>
+                            <span class="text-xs font-bold text-blue-950 flex items-center gap-1">🤖 AI แนะนำเมนูเพื่อสุขภาพ</span>
                             <div class="flex gap-1.5">
-                                <button onclick="generateAIMenu('มื้อเที่ยง')" class="text-[10px] bg-blue-900 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเที่ยง</button>
-                                <button onclick="generateAIMenu('มื้อเย็น')" class="text-[10px] bg-blue-800 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเย็น</button>
+                                <button onclick="generateAIMenu('มื้อเที่ยง')" class="text-[10px] bg-blue-900 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเที่ยงคลีน</button>
+                                <button onclick="generateAIMenu('มื้อเย็น')" class="text-[10px] bg-blue-800 text-white px-2.5 py-1 rounded-xl font-medium">มื้อเย็นคลีน</button>
                             </div>
                         </div>
-                        <div id="aiMenuBox" class="text-xs text-slate-600 bg-white p-3.5 rounded-2xl border border-blue-100/80 space-y-1">เลือกมื้อที่ต้องการให้ AI ช่วยคิดเมนูอร่อยไม่น่าเบื่อจากวัตถุดิบที่มี พร้อมคุมโควตาแคลอรีไม่ให้กระทบมื้อถัดไปครับ</div>
+                        <div id="aiMenuBox" class="text-xs text-slate-600 bg-white p-3.5 rounded-2xl border border-blue-100/80 space-y-1">เลือกมื้อที่ต้องการให้ AI ช่วยคัดสรรเฉพาะเมนูสุขภาพแคลอรีต่ำ รสชาติอร่อยไม่น่าเบื่อครับ</div>
                     </div>
                 </div>
 
                 <!-- PAGE 3: PROGRESS & WEIGHT -->
                 <div id="pageProgress" class="space-y-4 hidden">
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
-                        <h3 class="text-xs font-bold text-slate-900">⚖️ บันทึกน้ำหนักวันนี้</h3>
+                        <h3 class="text-xs font-bold text-slate-900">⚖️ บันทึกน้ำหนักวันนี้ & ตรวจสอบ BMI</h3>
                         <div class="flex gap-2">
                             <input type="number" step="0.1" id="inputWeightVal" placeholder="น้ำหนักปัจจุบัน (กก.)" class="flex-1 bg-slate-50 border border-slate-300/80 rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none">
                             <button onclick="submitWeight()" class="bg-blue-900 text-white px-5 py-2.5 rounded-2xl text-xs font-semibold shadow-md">บันทึก</button>
+                        </div>
+                        <div id="bmiResultBox" class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs text-slate-700 flex justify-between items-center">
+                            <span>ค่า BMI ปัจจุบัน: <strong id="bmiValText" class="text-blue-900">-</strong></span>
+                            <span id="bmiStatusText" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-600">-</span>
                         </div>
                     </div>
 
@@ -312,12 +331,14 @@
         let todayItems = [];
 
         let foodDatabase = [
-            { name: "อกไก่", calPerUnit: 1.65, unit: "g" },
-            { name: "ข้าวสวย", calPerUnit: 1.30, unit: "g" },
+            { name: "อกไก่ย่าง", calPerUnit: 1.65, unit: "g" },
+            { name: "ข้าวกล้อง", calPerUnit: 1.30, unit: "g" },
             { name: "ไข่ต้ม", calPerUnit: 1.55, unit: "g" },
-            { name: "ฟักทอง", calPerUnit: 0.26, unit: "g" },
-            { name: "เต้าหู้ไข่", calPerUnit: 0.70, unit: "g" },
-            { name: "วุ้นเส้น (ต้ม)", calPerUnit: 0.80, unit: "g" },
+            { name: "สลัดอกไก่", calPerUnit: 350, unit: "จาน" },
+            { name: "แกงจืดเต้าหู้หมูสับ", calPerUnit: 180, unit: "จาน" },
+            { name: "ปลานึ่งซีอิ๊ว", calPerUnit: 250, unit: "จาน" },
+            { name: "ส้มตำไทย", calPerUnit: 120, unit: "จาน" },
+            { name: "ข้าวต้มปลา", calPerUnit: 220, unit: "จาน" },
             { name: "น้ำเต้าหู้ (ไม่หวาน)", calPerUnit: 0.35, unit: "ml" },
             { name: "อเมริกาโน่ (ไม่หวาน)", calPerUnit: 0.05, unit: "ml" }
         ];
@@ -325,7 +346,7 @@
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('selectDate').value = todayStr;
-            populateFoodDropdown();
+            populateFoodDropdown(foodDatabase);
 
             const savedUser = localStorage.getItem('fitnavy_username');
             if (savedUser) {
@@ -432,6 +453,7 @@
             const goalStr = (currentProfile.goal === 'lose') ? `ลดน้ำหนัก ${currentProfile.targetWeightLoss} กก.` : 'รักษาน้ำหนัก';
             document.getElementById('progGoalText').innerText = goalStr;
 
+            calculateBMI(currentProfile.weight, currentProfile.height);
             loadDashboardData();
         }
 
@@ -481,55 +503,85 @@
             let totalEaten = 0;
             let totalBurn = 0;
             let hasWeight = false;
-            let meals = { "มื้อเช้า": false, "มื้อเที่ยง": false, "มื้อเย็น": false, "ของว่าง/เครื่องดื่ม": false };
-            let html = '';
+            let mealsMap = {
+                "มื้อเช้า": [],
+                "มื้อเที่ยง": [],
+                "มื้อเย็น": [],
+                "ของว่าง/เครื่องดื่ม": [],
+                "กิจกรรมออกกำลังกาย": [],
+                "บันทึกน้ำหนักตัว": []
+            };
 
-            items.forEach(item => {
+            items.forEach((item, index) => {
                 if (item.type === 'food') {
                     totalEaten += item.calories;
-                    if (item.detail.includes("มื้อเช้า")) meals["มื้อเช้า"] = true;
-                    if (item.detail.includes("มื้อเที่ยง")) meals["มื้อเที่ยง"] = true;
-                    if (item.detail.includes("มื้อเย็น")) meals["มื้อเย็น"] = true;
-                    if (item.detail.includes("ของว่าง")) meals["ของว่าง/เครื่องดื่ม"] = true;
-
-                    html += `
-                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center text-xs shadow-sm">
-                            <div>
-                                <span class="font-bold text-slate-900">${item.name}</span>
-                                <span class="text-slate-500 block text-[10px] font-light mt-0.5">${item.detail}</span>
-                            </div>
-                            <span class="text-rose-600 font-bold bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-100">-${item.calories} kcal</span>
-                        </div>`;
+                    if (item.detail.includes("มื้อเช้า")) mealsMap["มื้อเช้า"].push({ ...item, origIndex: index });
+                    else if (item.detail.includes("มื้อเที่ยง")) mealsMap["มื้อเที่ยง"].push({ ...item, origIndex: index });
+                    else if (item.detail.includes("มื้อเย็น")) mealsMap["มื้อเย็น"].push({ ...item, origIndex: index });
+                    else mealsMap["ของว่าง/เครื่องดื่ม"].push({ ...item, origIndex: index });
                 } else if (item.type === 'exercise') {
                     totalBurn += item.calories;
-                    html += `
-                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center text-xs shadow-sm">
-                            <div>
-                                <span class="font-bold text-slate-900">🏃 ${item.name}</span>
-                                <span class="text-slate-500 block text-[10px] font-light mt-0.5">${item.detail}</span>
-                            </div>
-                            <span class="text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-100">+${item.calories} kcal</span>
-                        </div>`;
+                    mealsMap["กิจกรรมออกกำลังกาย"].push({ ...item, origIndex: index });
                 } else if (item.type === 'weight') {
                     hasWeight = true;
-                    html += `
-                        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 flex justify-between items-center text-xs shadow-sm">
-                            <div>
-                                <span class="font-bold text-slate-900">⚖️ บันทึกน้ำหนัก</span>
-                                <span class="text-slate-500 block text-[10px] font-light mt-0.5">น้ำหนักวันนี้</span>
-                            </div>
-                            <span class="text-blue-900 font-bold bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-100">${item.calories} กก.</span>
-                        </div>`;
+                    mealsMap["บันทึกน้ำหนักตัว"].push({ ...item, origIndex: index });
+                    calculateBMI(item.calories, currentProfile.height);
                 }
             });
 
-            if (items.length === 0) html = '<div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>';
+            // Render Grouped Diary
+            let html = '';
+            const mealKeys = ["มื้อเช้า", "มื้อเที่ยง", "มื้อเย็น", "ของว่าง/เครื่องดื่ม", "กิจกรรมออกกำลังกาย", "บันทึกน้ำหนักตัว"];
+            let hasAnyData = items.length > 0;
+
+            mealKeys.forEach(meal => {
+                if (mealsMap[meal].length > 0) {
+                    html += `
+                        <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+                            <div class="font-bold text-xs text-blue-900 border-b border-slate-100 pb-1.5 flex justify-between">
+                                <span>📌 ${meal}</span>
+                                <span class="text-[10px] text-slate-400 font-normal">${mealsMap[meal].length} รายการ</span>
+                            </div>
+                            <div class="space-y-1.5">`;
+                    
+                    mealsMap[meal].forEach(sub => {
+                        let badgeColor = "text-rose-600 bg-rose-50 border-rose-100";
+                        let prefix = "-";
+                        let unitSuffix = "kcal";
+
+                        if (sub.type === 'exercise') {
+                            badgeColor = "text-emerald-600 bg-emerald-50 border-emerald-100";
+                            prefix = "+";
+                        } else if (sub.type === 'weight') {
+                            badgeColor = "text-blue-900 bg-blue-50 border-blue-100";
+                            prefix = "";
+                            unitSuffix = "กก.";
+                        }
+
+                        html += `
+                            <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                <div>
+                                    <span class="font-semibold text-slate-800">${sub.name}</span>
+                                    <span class="text-slate-500 block text-[10px] font-light">${sub.detail}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span class="${badgeColor} font-bold px-2 py-0.5 rounded-lg border text-[11px]">${prefix}${sub.calories} ${unitSuffix}</span>
+                                    <button onclick="deleteItemRecord('${sub.name}', '${sub.calories}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
+                                </div>
+                            </div>`;
+                    });
+
+                    html += `</div></div>`;
+                }
+            });
+
+            if (!hasAnyData) html = '<div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>';
             document.getElementById('diaryList').innerHTML = html;
 
-            updateMealChecklist('chkBreakfast', meals["มื้อเช้า"], '🌅 มื้อเช้า');
-            updateMealChecklist('chkLunch', meals["มื้อเที่ยง"], '☀️ มื้อเที่ยง');
-            updateMealChecklist('chkDinner', meals["มื้อเย็น"], '🌙 มื้อเย็น');
-            updateMealChecklist('chkSnack', meals["ของว่าง/เครื่องดื่ม"], '☕ ของว่าง');
+            updateMealChecklist('chkBreakfast', mealsMap["มื้อเช้า"].length > 0, '🌅 มื้อเช้า');
+            updateMealChecklist('chkLunch', mealsMap["มื้อเที่ยง"].length > 0, '☀️ มื้อเที่ยง');
+            updateMealChecklist('chkDinner', mealsMap["มื้อเย็น"].length > 0, '🌙 มื้อเย็น');
+            updateMealChecklist('chkSnack', mealsMap["ของว่าง/เครื่องดื่ม"].length > 0, '☕ ของว่าง');
 
             if (!hasWeight) { document.getElementById('weightAlert').classList.remove('hidden'); } else { document.getElementById('weightAlert').classList.add('hidden'); }
 
@@ -562,22 +614,48 @@
             }
         }
 
-        function populateFoodDropdown() {
+        function populateFoodDropdown(list) {
             const select = document.getElementById('foodSelect');
             select.innerHTML = '';
-            foodDatabase.forEach((food, idx) => {
-                select.innerHTML += `<option value="${idx}">${food.name} (${food.unit})</option>`;
+            list.forEach((food, idx) => {
+                select.innerHTML += `<option value="${idx}">${food.name} (${food.calPerUnit} kcal / ${food.unit})</option>`;
             });
             updateUnitLabel();
+        }
+
+        function filterFoodDropdown() {
+            const keyword = document.getElementById('foodSearchInput').value.toLowerCase().trim();
+            const filtered = foodDatabase.filter(f => f.name.toLowerCase().includes(keyword));
+            populateFoodDropdown(filtered);
         }
 
         function updateUnitLabel() {
             const idx = document.getElementById('foodSelect').value;
             const food = foodDatabase[idx];
-            document.getElementById('labelAmount').innerText = `ปริมาณ (${food.unit})`;
+            if (food) {
+                document.getElementById('labelAmount').innerText = `ปริมาณ (${food.unit})`;
+            }
         }
 
         function toggleCustomFoodForm() { document.getElementById('customFoodForm').classList.toggle('hidden'); }
+
+        // AI Smart Estimate for Custom Dish
+        function aiEstimateCustomFood() {
+            const name = document.getElementById('newFoodName').value.trim();
+            if (!name) { alert('กรุณากรอกชื่อเมนูก่อนกดให้ AI คำนวณครับ'); return; }
+
+            let estimatedCal = 350;
+            const lower = name.toLowerCase();
+            if (lower.includes('กะเพรา') || lower.includes('ผัดเผ็ด')) estimatedCal = 480;
+            else if (lower.includes('ต้มยำ')) estimatedCal = 220;
+            else if (lower.includes('ส้มตำ')) estimatedCal = 120;
+            else if (lower.includes('ข้าวผัด')) estimatedCal = 450;
+            else if (lower.includes('ก๋วยเตี๋ยว')) estimatedCal = 360;
+
+            document.getElementById('newFoodCal').value = estimatedCal;
+            document.getElementById('newFoodUnit').value = 'จาน';
+            alert(`🤖 AI คำนวณแคลอรีเบื้องต้นสำหรับ "${name}" ได้ประมาณ ${estimatedCal} kcal ต่อจานเรียบร้อยครับ`);
+        }
 
         function addNewCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
@@ -587,22 +665,26 @@
             if (!name || isNaN(cal) || cal <= 0) { alert('กรุณากรอกข้อมูลอาหารให้ครบถ้วน'); return; }
 
             foodDatabase.push({ name, calPerUnit: cal, unit });
-            populateFoodDropdown();
+            populateFoodDropdown(foodDatabase);
             document.getElementById('newFoodName').value = '';
             document.getElementById('newFoodCal').value = '';
             toggleCustomFoodForm();
-            alert(`เพิ่ม ${name} เข้าคลังแล้วครับ`);
+            alert(`เพิ่มเมนู "${name}" เข้าคลังสำเร็จ!`);
         }
 
         function addFoodToBatch() {
-            const idx = document.getElementById('foodSelect').value;
+            const select = document.getElementById('foodSelect');
+            if (select.selectedOptions.length === 0) { alert('กรุณาเลือกรายการอาหาร'); return; }
+            const idx = select.value;
             const amount = parseFloat(document.getElementById('foodAmount').value);
 
             if (isNaN(amount) || amount <= 0) { alert('กรุณาระบุปริมาณที่ถูกต้อง'); return; }
 
             const food = foodDatabase[idx];
-            selectedBatchFoods.push({ name: food.name, amount: amount, unit: food.unit, calories: Math.round(food.calPerUnit * amount) });
-            document.getElementById('foodAmount').value = '';
+            let totalCal = (food.unit === 'จาน') ? Math.round(food.calPerUnit * amount) : Math.round(food.calPerUnit * amount);
+
+            selectedBatchFoods.push({ name: food.name, amount: amount, unit: food.unit, calories: totalCal });
+            document.getElementById('foodAmount').value = '1';
             renderBatchList();
         }
 
@@ -657,6 +739,22 @@
             } catch(e) {}
         }
 
+        async function deleteItemRecord(itemName, itemCal) {
+            if (!confirm(`ต้องการลบรายการ "${itemName}" ออกจากระบบใช่ไหมครับ?`)) return;
+            const selectedDate = document.getElementById('selectDate').value;
+
+            try {
+                const payload = [{ username: currentProfile.username, date: selectedDate, type: 'delete', name: itemName, calories: itemCal, detail: '' }];
+                const res = await fetch(API_URL, {
+                    method: "POST",
+                    body: JSON.stringify({ action: "saveBatch", payload: payload })
+                }).then(r => r.json());
+
+                loadDashboardData();
+            } catch(e) { alert("ลบรายการไม่สำเร็จ"); }
+        }
+
+        // AI Healthy Menu Filter (Only Healthy)
         function generateAIMenu(mealTarget) {
             let eaten = 0;
             todayItems.forEach(i => { if (i.type === 'food') eaten += i.calories; });
@@ -665,21 +763,39 @@
             let allowedCal = remaining;
             if (mealTarget === 'มื้อเที่ยง' && remaining > 350) allowedCal = remaining - 350;
 
-            const creativeMenus = [
-                { name: "สุกี้แห้งอกไก่ใส่วุ้นเส้น & เต้าหู้ไข่", cal: 280, recipe: "ผัดอกไก่ 100g กับวุ้นเส้นต้ม 50g และเต้าหู้ไข่ 1/2 หลอด" },
-                { name: "ต้มยำอกไก่น้ำใสใส่ฟักทอง & เห็ด", cal: 210, recipe: "ต้มอกไก่ 100g พร้อมฟักทองหั่นชิ้น 100g" },
-                { name: "ไข่ต้มทรงเครื่อง + น้ำเต้าหู้ไม่หวาน", cal: 240, recipe: "ไข่ต้ม 2 ฟอง ทานคู่กับน้ำเต้าหู้ไม่หวาน 250 ml" }
+            const healthyMenus = [
+                { name: "สลัดอกไก่ย่างน้ำใส", cal: 280, recipe: "อกไก่ย่าง 100g ทานคู่ผักสลัดสด น้ำสลัดบัลซามิกใส" },
+                { name: "แกงจืดเต้าหู้หมูสับสาหร่าย", cal: 190, recipe: "ซดน้ำซุปร้อนๆ ใส่เต้าหู้ไข่และหมูสับปั้นก้อนเล็กๆ" },
+                { name: "ปลานึ่งซีอิ๊วกับข้าวกล้อง", cal: 310, recipe: "เนื้อปลาทับทิมนึ่งซีอิ๊วขิงอ่อน ทานกับข้าวกล้อง 1 ทัพพี" },
+                { name: "ส้มตำไทย & ไก่ย่างไม่หนัง", cal: 260, recipe: "ส้มตำรสชาติกลมกล่อมคู่กับอกไก่ย่างลอกหนัง" }
             ];
 
-            const choice = creativeMenus[Math.floor(Math.random() * creativeMenus.length)];
+            const choice = healthyMenus[Math.floor(Math.random() * healthyMenus.length)];
 
             document.getElementById('aiMenuBox').innerHTML = `
                 <div class="space-y-1">
-                    <span class="font-bold text-blue-900 block">✨ เมนูแนะนำ (${mealTarget}): ${choice.name} (~${choice.cal} kcal)</span>
-                    <p class="text-[11px] text-slate-600 block leading-relaxed">🍳 <b>สูตรทำง่าย:</b> ${choice.recipe}</p>
+                    <span class="font-bold text-emerald-950 block">🥗 เมนูเพื่อสุขภาพ (${mealTarget}): ${choice.name} (~${choice.cal} kcal)</span>
+                    <p class="text-[11px] text-slate-600 block leading-relaxed">💡 <b>วิธีทำ:</b> ${choice.recipe}</p>
                     <span class="text-[10px] text-emerald-700 font-semibold block">โควตามื้อนี้ไม่เกิน: ${allowedCal} kcal</span>
                 </div>
             `;
+        }
+
+        function calculateBMI(weightKg, heightCm) {
+            if (!weightKg || !heightCm) return;
+            const hM = heightCm / 100;
+            const bmi = (weightKg / (hM * hM)).toFixed(1);
+            document.getElementById('bmiValText').innerText = bmi;
+
+            let status = "ปกติ (สมส่วน)";
+            let colorClass = "bg-emerald-100 text-emerald-800";
+            if (bmi < 18.5) { status = "น้ำหนักน้อยกว่าเกณฑ์"; colorClass = "bg-amber-100 text-amber-800"; }
+            else if (bmi >= 23 && bmi < 25) { status = "ท้วม / เริ่มอ้วน"; colorClass = "bg-orange-100 text-orange-800"; }
+            else if (bmi >= 25) { status = "อ้วน"; colorClass = "bg-rose-100 text-rose-800"; }
+
+            const statusEl = document.getElementById('bmiStatusText');
+            statusEl.innerText = status;
+            statusEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold ${colorClass}`;
         }
 
         async function submitWeight() {
@@ -697,6 +813,7 @@
 
                 if (res && res.success) {
                     document.getElementById('inputWeightVal').value = '';
+                    calculateBMI(w, currentProfile.height);
                     switchPage('dashboard');
                     loadDashboardData();
                 }
