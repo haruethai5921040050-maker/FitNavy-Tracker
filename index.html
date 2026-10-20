@@ -317,18 +317,34 @@
         let currentProfile = null;
         let selectedBatchFoods = [];
         let todayItems = [];
-        let foodDatabase = [];
+        
+        // คลังอาหารสำรองภายใน (Fallback) เพื่อให้เว็บเปิดได้ทันทีโดยไม่ต้องรอโหลดจาก Google Sheets นาน
+        let foodDatabase = [
+            { name: "ฟักทองนึ่ง", calPerUnit: 0.50, unit: "g" },
+            { name: "เห็ดเข็มทองนึ่ง", calPerUnit: 0.35, unit: "g" },
+            { name: "อกไก่", calPerUnit: 1.65, unit: "g" },
+            { name: "ข้าวสวย", calPerUnit: 1.30, unit: "g" },
+            { name: "ไส้กรอก", calPerUnit: 3.00, unit: "g" },
+            { name: "วุ้นเส้น", calPerUnit: 1.00, unit: "g" },
+            { name: "เต้าหู้ไข่", calPerUnit: 0.85, unit: "g" },
+            { name: "ไข่ต้ม", calPerUnit: 1.55, unit: "g" },
+            { name: "สลัดอกไก่", calPerUnit: 350, unit: "จาน" },
+            { name: "แกงจืดเต้าหู้หมูสับ", calPerUnit: 180, unit: "จาน" }
+        ];
 
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('selectDate').value = todayStr;
-            loadFoodLibrary();
 
+            // ตรวจสอบการเข้าสู่ระบบทันที (ไม่บล็อกด้วยการโหลดคลังอาหาร)
             const savedUser = localStorage.getItem('fitnavy_username');
             if (savedUser) {
                 document.getElementById('loginUsername').value = savedUser;
                 handleLoginSilent(savedUser);
             }
+
+            // โหลดคลังอาหารจาก Google Sheets แบบเบื้องหลัง (Background Load) ไม่ให้หน่วงหน้าเว็บ
+            setTimeout(loadFoodLibrary, 500);
         };
 
         async function loadFoodLibrary() {
@@ -780,10 +796,9 @@
             }
         }
 
-        // 🤖 AI SMART MEAL CREATOR (คำนวณวัตถุดิบและกรัมอัตโนมัติจาก Google Sheets)
         function generateSmartAIMenu(mealTarget) {
             if (foodDatabase.length === 0) {
-                document.getElementById('aiMenuBox').innerHTML = `<div class="text-rose-600">⚠️ กำลังโหลดคลังข้อมูลจาก Google Sheets... กรุณากดปุ่มรีเฟรชด้านบนอีกครั้ง</div>`;
+                document.getElementById('aiMenuBox').innerHTML = `<div class="text-rose-600">⚠️ กำลังโหลดคลังข้อมูล... กรุณาลองใหม่อีกครั้ง</div>`;
                 return;
             }
 
@@ -791,7 +806,6 @@
             todayItems.forEach(i => { if (i.type === 'food') eaten += i.calories; });
             let remaining = Number(currentProfile.targetCalories) - eaten;
 
-            // กำหนดโควตาแคลอรีที่เหมาะสมตามมื้อ
             let targetMealCal = 400;
             if (mealTarget === 'มื้อเช้า') targetMealCal = 350;
             if (mealTarget === 'มื้อเที่ยง') targetMealCal = 450;
@@ -799,7 +813,6 @@
 
             if (remaining > 0 && remaining < targetMealCal) targetMealCal = Math.max(200, remaining);
 
-            // ค้นหาวัตถุดิบในคลัง
             const findFood = (keyword) => foodDatabase.find(f => f.name.includes(keyword));
 
             const fChicken = findFood("อกไก่");
@@ -808,7 +821,6 @@
             const fRice = findFood("ข้าว");
             const fGlassNoodle = findFood("วุ้นเส้น");
             const fTofu = findFood("เต้าหู้ไข่");
-            const fEgg = findFood("ไข่");
 
             let generatedRecipes = [
                 {
@@ -846,7 +858,6 @@
                 }
             ];
 
-            // สุ่มเมนูจากรายการที่สร้างสรรค์
             const recipe = generatedRecipes[Math.floor(Math.random() * generatedRecipes.length)];
             
             let totalRecipeCal = 0;
