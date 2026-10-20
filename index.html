@@ -44,7 +44,7 @@
                 <div id="loginForm" class="bg-white p-6 rounded-3xl border border-slate-200/80 custom-shadow space-y-4">
                     <div class="text-center space-y-1">
                         <h2 class="text-base font-bold text-slate-900">เข้าสู่ระบบ FitNavy</h2>
-                        <p class="text-xs text-slate-500">พิมพ์ชื่อผู้ใช้เพื่อดึงข้อมูลแบบเรียลไทม์</p>
+                        <p class="text-xs text-slate-500">พิมพ์ชื่อผู้ใช้เพื่อเข้าใช้งานทันที</p>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
@@ -170,8 +170,8 @@
 
                     <div class="space-y-2.5">
                         <div class="flex justify-between items-center px-1">
-                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">📝 ประวัติวันนี้ (จัดกลุ่มตามมื้อ)</h4>
-                            <span class="text-[10px] text-slate-400">กด ✕ เพื่อลบรายการ</span>
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">📝 ประวัติวันนี้</h4>
+                            <span class="text-[10px] text-slate-400">กด ✕ เพื่อลบรายการแบบทันที</span>
                         </div>
                         <div id="diaryList" class="space-y-3 min-h-[100px]">
                             <div class="text-center text-xs text-slate-400 py-8">ยังไม่มีรายการบันทึกในวันนี้</div>
@@ -183,23 +183,23 @@
                 <div id="pageFood" class="space-y-4 hidden">
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3.5">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
-                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร (พิมพ์กรองชื่อได้ทันที)</h3>
+                            <h3 class="text-xs font-bold text-slate-900">🍲 บันทึกอาหาร (เลือกจากเมนูที่แอดไว้)</h3>
                             <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เพิ่มเมนูส่วนตัว</button>
                         </div>
 
-                        <!-- CUSTOM FOOD FORM -->
+                        <!-- CUSTOM FOOD FORM WITH AI POPUP -->
                         <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2.5 text-xs">
-                            <span class="font-bold text-blue-950 block">เพิ่มเมนูส่วนตัว (พิมพ์ชื่อระบบคิดแคลให้ทันที)</span>
+                            <span class="font-bold text-blue-950 block">เพิ่มเมนูส่วนตัว (AI ช่วยคำนวณแคลอรี)</span>
                             <div>
-                                <label class="block text-[11px] text-slate-600 mb-1">ชื่อเมนู (เช่น กะเพราไก่, ส้มตำไทย)</label>
+                                <label class="block text-[11px] text-slate-600 mb-1">ชื่อเมนู (เช่น แกงเขียวหวาน, ข้าวผัดกุ้ง)</label>
                                 <div class="flex gap-2">
-                                    <input type="text" id="newFoodName" placeholder="ชื่อเมนูอาหาร" class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
-                                    <button onclick="aiEstimateCustomFood()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-[11px] font-medium">🤖 ให้ AI คำนวณ</button>
+                                    <input type="text" id="newFoodName" placeholder="พิมพ์ชื่อเมนู..." class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                    <button onclick="aiEstimateCustomFood()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap">🤖 AI คำนวณ</button>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label class="block text-[11px] text-slate-600 mb-1">แคลอรีต่อหน่วย/จาน</label>
+                                    <label class="block text-[11px] text-slate-600 mb-1">แคลอรี</label>
                                     <input type="number" step="0.01" id="newFoodCal" placeholder="เช่น 450" class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
                                 </div>
                                 <div>
@@ -224,13 +224,13 @@
                             </select>
                         </div>
 
-                        <!-- SEARCHABLE FILTER DROPDOWN CONTAINER -->
+                        <!-- SEARCHABLE DROPDOWN FOR ADDED FOODS -->
                         <div class="grid grid-cols-3 gap-2 relative">
                             <div class="col-span-2 space-y-1">
-                                <label class="block text-xs font-medium text-slate-600">ค้นหา / เลือกเมนูอาหาร</label>
-                                <input type="text" id="foodFilterInput" oninput="filterFoodList()" placeholder="🔍 พิมพ์เพื่อค้นหา..." class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-800/30">
-                                <div id="foodDropdownList" class="hidden absolute left-0 right-14 top-16 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto z-30 p-1 space-y-0.5"></div>
-                                <input type="hidden" id="selectedFoodIndex" value="0">
+                                <label class="block text-xs font-medium text-slate-600">เลือกอาหารที่บันทึกไว้</label>
+                                <input type="text" id="foodSearchBox" onfocus="openFoodDropdown()" oninput="filterFoodDropdown()" placeholder="คลิกเลือกหรือพิมพ์ค้นหา..." class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-3 py-2.5 text-xs text-slate-800 focus:outline-none">
+                                <div id="foodDropdownResults" class="hidden absolute left-0 right-14 top-16 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto z-30 p-1 space-y-0.5"></div>
+                                <input type="hidden" id="selectedFoodIdx" value="">
                             </div>
                             <div>
                                 <label id="labelAmount" class="block text-xs font-medium text-slate-600 mb-1">ปริมาณ</label>
@@ -325,7 +325,7 @@
 
     <!-- CUSTOM MODAL POPUP -->
     <div id="customModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in duration-200">
+        <div class="bg-white rounded-3xl max-w-xs w-full p-6 text-center shadow-2xl space-y-4 border border-slate-200">
             <div id="modalIcon" class="text-3xl">🤖</div>
             <h3 id="modalTitle" class="text-sm font-bold text-slate-900">แจ้งเตือน</h3>
             <p id="modalMessage" class="text-xs text-slate-600 leading-relaxed"></p>
@@ -358,7 +358,6 @@
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('selectDate').value = todayStr;
-            renderFoodDropdownList(foodDatabase);
 
             const savedUser = localStorage.getItem('fitnavy_username');
             if (savedUser) {
@@ -570,7 +569,7 @@
             mealKeys.forEach(meal => {
                 if (mealsMap[meal].length > 0) {
                     html += `
-                        <div class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+                        <div id="group-${meal}" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
                             <div class="font-bold text-xs text-blue-900 border-b border-slate-100 pb-1.5 flex justify-between">
                                 <span>📌 ${meal}</span>
                                 <span class="text-[10px] text-slate-400 font-normal">${mealsMap[meal].length} รายการ</span>
@@ -592,14 +591,14 @@
                         }
 
                         html += `
-                            <div class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
+                            <div id="row-item-${sub.rowIndex}" class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
                                 <div>
                                     <span class="font-semibold text-slate-800">${sub.name}</span>
                                     <span class="text-slate-500 block text-[10px] font-light">${sub.detail}</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <span class="${badgeColor} font-bold px-2 py-0.5 rounded-lg border text-[11px]">${prefix}${sub.calories} ${unitSuffix}</span>
-                                    <button onclick="confirmDeleteItem(${sub.rowIndex}, '${sub.name}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
+                                    <button onclick="confirmDeleteItem(${sub.rowIndex}, '${sub.name}', ${sub.calories}, '${sub.type}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
                                 </div>
                             </div>`;
                     });
@@ -636,30 +635,37 @@
             if (remaining < 350 && remaining >= 0) { document.getElementById('badgeBuffer').classList.remove('hidden'); } else { document.getElementById('badgeBuffer').classList.add('hidden'); }
         }
 
-        // 🗑️ ป๊อปอัพยืนยันการลบที่สวยงามและใช้งานได้จริง
-        function confirmDeleteItem(rowIndex, itemName) {
+        // 🗑️ ลบแบบ Instant UI (หายวับไปทันทีไม่ต้องรอรีโหลด)
+        function confirmDeleteItem(rowIndex, itemName, itemCal, itemType) {
             showModal(
                 "🗑️ ยืนยันการลบ",
                 `ต้องการลบรายการ <b>"${itemName}"</b> ออกจากระบบใช่ไหมครับ?`,
                 "⚠️",
                 `
                 <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl font-semibold text-xs transition">ยกเลิก</button>
-                <button onclick="executeDeleteItem(${rowIndex})" class="bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">ยืนยันการลบ</button>
+                <button onclick="executeDeleteItem(${rowIndex}, ${itemCal}, '${itemType}')" class="bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">ยืนยันการลบ</button>
                 `
             );
         }
 
-        async function executeDeleteItem(rowIndex) {
+        async function executeDeleteItem(rowIndex, itemCal, itemType) {
             closeModal();
+            // ซ่อนแถวทันทีแบบเรียลไทม์เพื่อความเร็วสูงสุด
+            const rowEl = document.getElementById(`row-item-${rowIndex}`);
+            if (rowEl) rowEl.style.display = 'none';
+
+            // ตัดข้อมูลออกจากอาเรย์ในหน้าจอทันที
+            todayItems = todayItems.filter(i => i.rowIndex !== rowIndex);
+            renderDashboard(todayItems);
+
             try {
                 const payload = [{ type: 'delete', rowIndex: rowIndex }];
                 await fetch(API_URL, {
                     method: "POST",
                     body: JSON.stringify({ action: "saveBatch", payload: payload })
                 });
-                loadDashboardData();
             } catch(e) {
-                showModal("แจ้งเตือน", "ลบรายการไม่สำเร็จ กรุณาลองใหม่อีกครั้ง", "❌", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+                loadDashboardData(); // โหลดใหม่ถ้าพลาด
             }
         }
 
@@ -674,25 +680,36 @@
             }
         }
 
-        // 🔍 ระบบกรองค้นหาอาหารแบบพิมพ์ได้ (Searchable Filter)
-        function renderFoodDropdownList(list) {
-            const container = document.getElementById('foodDropdownList');
+        // 🔍 ระบบค้นหาอาหารจากคลังที่แอดไว้
+        function openFoodDropdown() {
+            renderFoodDropdownResults(foodDatabase);
+            document.getElementById('foodDropdownResults').classList.remove('hidden');
+        }
+
+        function filterFoodDropdown() {
+            const keyword = document.getElementById('foodSearchBox').value.toLowerCase().trim();
+            const filtered = foodDatabase.filter(f => f.name.toLowerCase().includes(keyword));
+            renderFoodDropdownResults(filtered);
+            document.getElementById('foodDropdownResults').classList.remove('hidden');
+        }
+
+        function renderFoodDropdownResults(list) {
+            const container = document.getElementById('foodDropdownResults');
             container.innerHTML = '';
             
             if (list.length === 0) {
                 container.innerHTML = `<div class="p-2 text-xs text-slate-400 text-center">ไม่พบเมนูนี้</div>`;
-                container.classList.remove('hidden');
                 return;
             }
 
             list.forEach((food) => {
-                const originalIndex = foodDatabase.findIndex(f => f.name === food.name);
+                const originalIdx = foodDatabase.findIndex(f => f.name === food.name);
                 const div = document.createElement('div');
                 div.className = "p-2 hover:bg-blue-50 rounded-xl cursor-pointer text-xs text-slate-800 flex justify-between items-center";
                 div.innerHTML = `<span>${food.name}</span> <span class="text-slate-400 text-[10px]">${food.calPerUnit} kcal / ${food.unit}</span>`;
                 div.onclick = function() {
-                    document.getElementById('foodFilterInput').value = food.name;
-                    document.getElementById('selectedFoodIndex').value = originalIndex;
+                    document.getElementById('foodSearchBox').value = food.name;
+                    document.getElementById('selectedFoodIdx').value = originalIdx;
                     document.getElementById('labelAmount').innerText = `ปริมาณ (${food.unit})`;
                     container.classList.add('hidden');
                 };
@@ -700,31 +717,18 @@
             });
         }
 
-        function filterFoodList() {
-            const keyword = document.getElementById('foodFilterInput').value.toLowerCase().trim();
-            const container = document.getElementById('foodDropdownList');
-            
-            if (keyword === "") {
-                container.classList.add('hidden');
-                return;
-            }
-
-            const filtered = foodDatabase.filter(f => f.name.toLowerCase().includes(keyword));
-            renderFoodDropdownList(filtered);
-            container.classList.remove('hidden');
-        }
-
-        // ซ่อน dropdown เมื่อคลิกพื้นที่อื่นนอกช่องค้นหา
+        // ซ่อน dropdown เมื่อคลิกข้างนอก
         document.addEventListener('click', function(e) {
-            const searchBox = document.getElementById('foodFilterInput');
-            const dropdown = document.getElementById('foodDropdownList');
-            if (searchBox && dropdown && !searchBox.contains(e.target) && !dropdown.contains(e.target)) {
+            const box = document.getElementById('foodSearchBox');
+            const dropdown = document.getElementById('foodDropdownResults');
+            if (box && dropdown && !box.contains(e.target) && !dropdown.contains(e.target)) {
                 dropdown.classList.add('hidden');
             }
         });
 
         function toggleCustomFoodForm() { document.getElementById('customFoodForm').classList.toggle('hidden'); }
 
+        // 🤖 AI คำนวณเมนูส่วนตัวพร้อมป๊อปอัพ "ใส่บันทึกเลย" / "ยกเลิก"
         function aiEstimateCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
             if (!name) { 
@@ -734,7 +738,7 @@
 
             let estimatedCal = 350;
             const lower = name.toLowerCase();
-            if (lower.includes('กะเพรา') || lower.includes('ผัดเผ็ด')) estimatedCal = 480;
+            if (lower.includes('กะเพรา') || lower.includes('ผัดเผ็ด') || lower.includes('แกงเขียวหวาน')) estimatedCal = 480;
             else if (lower.includes('ต้มยำ')) estimatedCal = 220;
             else if (lower.includes('ส้มตำ')) estimatedCal = 120;
             else if (lower.includes('ข้าวผัด')) estimatedCal = 450;
@@ -781,11 +785,11 @@
         }
 
         function addFoodToBatch() {
-            const idx = parseInt(document.getElementById('selectedFoodIndex').value);
-            const searchVal = document.getElementById('foodFilterInput').value.trim();
+            const idx = parseInt(document.getElementById('selectedFoodIdx').value);
+            const searchVal = document.getElementById('foodSearchBox').value.trim();
             
             if (!searchVal || isNaN(idx) || !foodDatabase[idx]) { 
-                showModal("แจ้งเตือน", "กรุณาพิมพ์ค้นหาและเลือกเมนูอาหารจากรายการ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+                showModal("แจ้งเตือน", "กรุณาคลิกเลือกเมนูอาหารจากรายการที่ค้นหา", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
                 return; 
             }
 
@@ -799,7 +803,7 @@
             let totalCal = Math.round(food.calPerUnit * amount);
 
             selectedBatchFoods.push({ name: food.name, amount: amount, unit: food.unit, calories: totalCal });
-            document.getElementById('foodFilterInput').value = '';
+            document.getElementById('foodSearchBox').value = '';
             document.getElementById('foodAmount').value = '1';
             renderBatchList();
         }
