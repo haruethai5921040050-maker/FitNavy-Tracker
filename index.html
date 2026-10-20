@@ -384,7 +384,6 @@
             document.getElementById('customFoodForm').classList.toggle('hidden');
         }
 
-        // 🤖 AI คำนวณแคลอรีโดยอิงจากหน่วยที่ผู้ใช้เลือก (จาน, ml, g, แก้ว, ชิ้น)
         function aiEstimateCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
             const unit = document.getElementById('newFoodUnit').value;
@@ -397,7 +396,6 @@
             let calculatedCal = 350;
             const lower = name.toLowerCase();
 
-            // คำนวณตามหน่วยที่ผู้ใช้เลือก
             if (unit === 'จาน') {
                 if (lower.includes('คลีน') || lower.includes('ผัก')) calculatedCal = 250;
                 else if (lower.includes('ทอด') || lower.includes('มัน')) calculatedCal = 550;
@@ -453,33 +451,23 @@
                 return;
             }
 
-            try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "addCustomFood",
-                        payload: { name, calPerUnit, unit }
-                    })
-                }).then(r => r.json());
+            foodDatabase.push({ name, calPerUnit, unit });
+            document.getElementById('newFoodName').value = '';
+            document.getElementById('newFoodCal').value = '';
+            toggleCustomFoodForm();
 
-                if (res && res.success) {
-                    foodDatabase.push({ name, calPerUnit, unit });
-                    document.getElementById('newFoodName').value = '';
-                    document.getElementById('newFoodCal').value = '';
-                    toggleCustomFoodForm();
+            showModal(
+                "✅ สำเร็จ",
+                `เพิ่มเมนู "${name}" เรียบร้อยแล้วครับ!`,
+                "🍲",
+                `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`
+            );
 
-                    showModal(
-                        "✅ สำเร็จ",
-                        `เพิ่มเมนู "${name}" เรียบร้อยแล้วครับ!`,
-                        "🍲",
-                        `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`
-                    );
-                } else {
-                    alert("บันทึกไม่สำเร็จ");
-                }
-            } catch(e) {
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
-            }
+            // ส่งเบื้องหลังแบบไม่บล็อก UI
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "addCustomFood", payload: { name, calPerUnit, unit } })
+            }).catch(e => {});
         }
 
         function showModal(title, message, icon, buttonsHTML) {
@@ -771,15 +759,10 @@
             todayItems = todayItems.filter(i => i.rowIndex !== rowIndex);
             renderDashboard(todayItems);
 
-            try {
-                const payload = [{ type: 'delete', rowIndex: rowIndex }];
-                await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "saveBatch", payload: payload })
-                });
-            } catch(e) {
-                loadDashboardData();
-            }
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "saveBatch", payload: [{ type: 'delete', rowIndex: rowIndex }] })
+            }).catch(e => {});
         }
 
         function updateMealChecklist(elementId, isDone, title) {
@@ -882,6 +865,7 @@
             box.innerHTML = html;
         }
 
+        // ⚡ Optimistic UI: อัปเดตหน้าจอทันที ไม่ต้องรอเน็ต
         async function submitBatchFood() {
             if (selectedBatchFoods.length === 0) { 
                 showModal("แจ้งเตือน", "กรุณาเลือกรายการอาหารก่อนครับ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
@@ -900,26 +884,83 @@
                 detail: `${mealType} (${item.amount} ${item.unit})`
             }));
 
-            try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "saveBatch", payload: payloadList })
-                }).then(r => r.json());
+            // จำลองข้อมูลใส่ local ทันทีเพื่อให้แดชบอร์ดอัปเดตไวสุดๆ
+            payloadList.forEach(p => todayItems.push(p));
+            selectedBatchFoods = [];
+            renderBatchList();
+            renderDashboard(todayItems);
 
-                if (res && res.success) {
-                    selectedBatchFoods = [];
-                    renderBatchList();
-                    
-                    showModal(
-                        "✅ สำเร็จ",
-                        "บันทึกรายการอาหารเรียบร้อยแล้วครับ!",
-                        "🎉",
-                        `<button onclick="closeModal(); switchPage('dashboard'); loadDashboardData();" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">ตกลง</button>`
-                    );
-                }
-            } catch(e) {
-                showModal("แจ้งเตือน", "เกิดข้อผิดพลาดในการบันทึก", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+            showModal(
+                "✅ สำเร็จ",
+                "บันทึกรายการอาหารเรียบร้อยแล้วครับ!",
+                "🎉",
+                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">ตกลง</button>`
+            );
+
+            // ส่งเบื้องหลังเงียบๆ
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "saveBatch", payload: payloadList })
+            }).catch(e => {});
+        }
+
+        async function submitWeight() {
+            const w = parseFloat(document.getElementById('inputWeightVal').value);
+            const date = document.getElementById('selectDate').value;
+            if (isNaN(w) || w <= 0) { 
+                showModal("แจ้งเตือน", "กรุณากรอกน้ำหนักให้ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+                return; 
             }
+
+            document.getElementById('inputWeightVal').value = '';
+            calculateBMI(w, currentProfile.height);
+            todayItems.push({ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' });
+            renderDashboard(todayItems);
+
+            showModal(
+                "✅ สำเร็จ",
+                "บันทึกน้ำหนักเรียบร้อยแล้วครับ!",
+                "⚖️",
+                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
+            );
+
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }] })
+            }).catch(e => {});
+        }
+
+        async function submitExercise() {
+            const exType = document.getElementById('exTypeSelect').value;
+            const min = parseFloat(document.getElementById('exMinutes').value);
+            const date = document.getElementById('selectDate').value;
+
+            if (isNaN(min) || min <= 0) { 
+                showModal("แจ้งเตือน", "กรุณากรอกระยะเวลาออกกำลังกาย", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+                return; 
+            }
+
+            let exName = 'วิ่ง'; let calMin = 10;
+            if (exType === 'jumprope') { exName = 'กระโดดเชือก'; calMin = 12; }
+            if (exType === 'situp') { exName = 'ซิทอัพ'; calMin = 8; }
+
+            const totalExCal = Math.round(calMin * min);
+            document.getElementById('exMinutes').value = '';
+
+            todayItems.push({ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: totalExCal, detail: `ออกกำลังกาย ${min} นาที` });
+            renderDashboard(todayItems);
+
+            showModal(
+                "✅ สำเร็จ",
+                "บันทึกการออกกำลังกายเรียบร้อยแล้วครับ!",
+                "🏃",
+                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
+            );
+
+            fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: totalExCal, detail: `ออกกำลังกาย ${min} นาที` }] })
+            }).catch(e => {});
         }
 
         function generateSmartAIMenu(mealTarget) {
@@ -1017,71 +1058,6 @@
             const statusEl = document.getElementById('bmiStatusText');
             statusEl.innerText = status;
             statusEl.className = `px-2 py-0.5 rounded-full text-[10px] font-bold ${colorClass}`;
-        }
-
-        async function submitWeight() {
-            const w = parseFloat(document.getElementById('inputWeightVal').value);
-            const date = document.getElementById('selectDate').value;
-            if (isNaN(w) || w <= 0) { 
-                showModal("แจ้งเตือน", "กรุณากรอกน้ำหนักให้ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
-            }
-
-            const payload = [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }];
-
-            try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "saveBatch", payload: payload })
-                }).then(r => r.json());
-
-                if (res && res.success) {
-                    document.getElementById('inputWeightVal').value = '';
-                    calculateBMI(w, currentProfile.height);
-                    
-                    showModal(
-                        "✅ สำเร็จ",
-                        "บันทึกน้ำหนักเรียบร้อยแล้วครับ!",
-                        "⚖️",
-                        `<button onclick="closeModal(); switchPage('dashboard'); loadDashboardData();" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
-                    );
-                }
-            } catch(e) {}
-        }
-
-        async function submitExercise() {
-            const exType = document.getElementById('exTypeSelect').value;
-            const min = parseFloat(document.getElementById('exMinutes').value);
-            const date = document.getElementById('selectDate').value;
-
-            if (isNaN(min) || min <= 0) { 
-                showModal("แจ้งเตือน", "กรุณากรอกระยะเวลาออกกำลังกาย", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
-            }
-
-            let exName = 'วิ่ง'; let calMin = 10;
-            if (exType === 'jumprope') { exName = 'กระโดดเชือก'; calMin = 12; }
-            if (exType === 'situp') { exName = 'ซิทอัพ'; calMin = 8; }
-
-            const payload = [{ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: Math.round(calMin * min), detail: `ออกกำลังกาย ${min} นาที` }];
-
-            try {
-                const res = await fetch(API_URL, {
-                    method: "POST",
-                    body: JSON.stringify({ action: "saveBatch", payload: payload })
-                }).then(r => r.json());
-
-                if (res && res.success) {
-                    document.getElementById('exMinutes').value = '';
-                    
-                    showModal(
-                        "✅ สำเร็จ",
-                        "บันทึกการออกกำลังกายเรียบร้อยแล้วครับ!",
-                        "🏃",
-                        `<button onclick="closeModal(); switchPage('dashboard'); loadDashboardData();" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
-                    );
-                }
-            } catch(e) {}
         }
     </script>
 </body>
