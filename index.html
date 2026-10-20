@@ -187,12 +187,15 @@
                             <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เพิ่มเมนูใหม่</button>
                         </div>
 
-                        <!-- CUSTOM FOOD FORM -->
+                        <!-- CUSTOM FOOD FORM WITH AI ESTIMATOR -->
                         <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2.5 text-xs">
                             <span class="font-bold text-blue-950 block">เพิ่มเมนูใหม่เข้า Google Sheets</span>
                             <div>
                                 <label class="block text-[11px] text-slate-600 mb-1">ชื่อเมนูอาหาร</label>
-                                <input type="text" id="newFoodName" placeholder="เช่น อกไก่ต้ม..." class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                <div class="flex gap-2">
+                                    <input type="text" id="newFoodName" placeholder="เช่น อกไก่ต้ม, ข้าวผัด..." class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                                    <button onclick="aiEstimateCustomFood()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-2 rounded-xl text-[11px] font-medium whitespace-nowrap">🤖 AI คำนวณ</button>
+                                </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
                                 <div>
@@ -209,7 +212,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <button onclick="addNewCustomFood()" class="w-full bg-blue-900 hover:bg-blue-800 text-white py-2 rounded-xl font-medium">บันทึกเข้า Google Sheets</button>
+                            <button onclick="addNewCustomFood()" class="w-full bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-medium shadow-md">เพิ่มเมนูใหม่</button>
                         </div>
 
                         <div>
@@ -382,6 +385,53 @@
             document.getElementById('customFoodForm').classList.toggle('hidden');
         }
 
+        function aiEstimateCustomFood() {
+            const name = document.getElementById('newFoodName').value.trim();
+            if (!name) {
+                showModal("แจ้งเตือน", "กรุณากรอกชื่อเมนูก่อนกดให้ AI คำนวณครับ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
+                return;
+            }
+
+            let estimatedCal = 350;
+            let estimatedUnit = "จาน";
+            const lower = name.toLowerCase();
+
+            if (lower.includes('นึ่ง') || lower.includes('ต้ม') || lower.includes('อกไก่')) {
+                estimatedCal = 1.65;
+                estimatedUnit = "g";
+            } else if (lower.includes('ข้าว')) {
+                estimatedCal = 1.30;
+                estimatedUnit = "g";
+            } else if (lower.includes('น้ำ') || lower.includes('เครื่องดื่ม') || lower.includes('นม')) {
+                estimatedCal = 0.70;
+                estimatedUnit = "ml";
+            } else if (lower.includes('ผัด') || lower.includes('ทอด') || lower.includes('แกง')) {
+                estimatedCal = 450;
+                estimatedUnit = "จาน";
+            }
+
+            document.getElementById('newFoodCal').value = estimatedCal;
+            document.getElementById('newFoodUnit').value = estimatedUnit;
+
+            showModal(
+                "🤖 AI คำนวณแคลอรีสำเร็จ",
+                `เมนู <b>"${name}"</b> AI ประเมินประมาณ <b>${estimatedCal} kcal</b> (หน่วย: ${estimatedUnit}) ต้องการบันทึกเลยไหมครับ?`,
+                "✨",
+                `
+                <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl font-semibold text-xs transition">ยกเลิก</button>
+                <button onclick="confirmAddCustomFoodFromAI('${name}', ${estimatedCal}, '${estimatedUnit}')" class="bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">บันทึกเมนูเลย</button>
+                `
+            );
+        }
+
+        async function confirmAddCustomFoodFromAI(name, cal, unit) {
+            closeModal();
+            document.getElementById('newFoodName').value = name;
+            document.getElementById('newFoodCal').value = cal;
+            document.getElementById('newFoodUnit').value = unit;
+            await addNewCustomFood();
+        }
+
         async function addNewCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
             const calPerUnit = parseFloat(document.getElementById('newFoodCal').value);
@@ -409,7 +459,7 @@
 
                     showModal(
                         "✅ สำเร็จ",
-                        `เพิ่มเมนู "${name}" เข้า Google Sheets เรียบร้อยแล้วครับ!`,
+                        `เพิ่มเมนู "${name}" เรียบร้อยแล้วครับ!`,
                         "🍲",
                         `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`
                     );
