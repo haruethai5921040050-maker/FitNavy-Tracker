@@ -79,7 +79,7 @@
                     </div>
                     <div class="grid grid-cols-2 gap-2.5">
                         <div>
-                            <label class="block text-xs text-slate-600 mb-1">น้ำหนักปัจจุบัน (กก.)</label>
+                            <label class="block text-xs text-slate-600 mb-1">น้ำหนักเริ่มต้น (กก.)</label>
                             <input type="number" step="0.1" id="regWeight" value="65" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
                         </div>
                         <div>
@@ -187,7 +187,6 @@
                             <button onclick="toggleCustomFoodForm()" class="text-[11px] text-blue-800 underline font-semibold">+ เพิ่มเมนูใหม่</button>
                         </div>
 
-                        <!-- CUSTOM FOOD FORM WITH UNIT-BASED AI ESTIMATOR -->
                         <div id="customFoodForm" class="hidden bg-blue-50/70 p-3.5 rounded-2xl border border-blue-200 space-y-2.5 text-xs">
                             <span class="font-bold text-blue-950 block">เพิ่มเมนูใหม่</span>
                             <div>
@@ -224,7 +223,6 @@
                             </select>
                         </div>
 
-                        <!-- SEARCHABLE DROPDOWN FOR GOOGLE SHEETS FOODS -->
                         <div class="grid grid-cols-3 gap-2 relative">
                             <div class="col-span-2 space-y-1">
                                 <label class="block text-xs font-medium text-slate-600">เลือกอาหารจากคลังหลังบ้าน</label>
@@ -250,7 +248,6 @@
                         <button onclick="submitBatchFood()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-md text-xs">บันทึกมื้ออาหารทั้งหมด</button>
                     </div>
 
-                    <!-- 🤖 AI SMART MEAL CREATOR -->
                     <div class="bg-blue-50/80 p-4 rounded-3xl border border-blue-100 space-y-3">
                         <div class="flex justify-between items-center border-b border-blue-200 pb-2">
                             <span class="text-xs font-bold text-blue-950 flex items-center gap-1">🤖 AI ครีเอทเมนูสุขภาพอัตโนมัติ</span>
@@ -268,6 +265,18 @@
 
                 <!-- PAGE 3: PROGRESS & WEIGHT -->
                 <div id="pageProgress" class="space-y-4 hidden">
+                    
+                    <!-- NEW SECTION: สรุปประวัติรายวัน -->
+                    <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
+                            <h3 class="text-xs font-bold text-slate-900">🗓️ สรุปประวัติรายวัน</h3>
+                            <button onclick="loadHistoryData()" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1.5 rounded-xl font-medium transition">🔄 อัปเดต</button>
+                        </div>
+                        <div id="historyList" class="space-y-2.5 max-h-[320px] overflow-y-auto pr-1">
+                            <div class="text-center text-xs text-slate-400 py-6">กำลังโหลดข้อมูล...</div>
+                        </div>
+                    </div>
+
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
                         <h3 class="text-xs font-bold text-slate-900">⚖️ บันทึกน้ำหนักวันนี้ & ตรวจสอบ BMI</h3>
                         <div class="flex gap-2">
@@ -293,8 +302,8 @@
                         <button onclick="submitExercise()" class="w-full bg-blue-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">บันทึกออกกำลังกาย</button>
                     </div>
 
-                    <div class="navy-gradient text-white p-5 rounded-3xl space-y-2 text-xs shadow-lg">
-                        <span class="font-bold text-blue-200 block border-b border-white/10 pb-2">📊 ติดตามความคืบหน้า</span>
+                    <div class="navy-gradient text-white p-5 rounded-3xl space-y-2 text-xs shadow-lg mb-4">
+                        <span class="font-bold text-blue-200 block border-b border-white/10 pb-2">📊 ข้อมูลโปรไฟล์</span>
                         <div class="flex justify-between pt-1">
                             <span class="text-slate-300">เริ่มทำตั้งแต่:</span>
                             <span id="progStartDate" class="font-medium">-</span>
@@ -344,6 +353,7 @@
         let currentProfile = null;
         let selectedBatchFoods = [];
         let todayItems = [];
+        let historyCache = [];
         
         let foodDatabase = [
             { name: "ฟักทองนึ่ง", calPerUnit: 0.50, unit: "g" },
@@ -374,15 +384,11 @@
         async function loadFoodLibrary() {
             try {
                 const res = await fetch(`${API_URL}?action=getFoodLibrary`).then(r => r.json());
-                if (res && res.length > 0) {
-                    foodDatabase = res;
-                }
+                if (res && res.length > 0) foodDatabase = res;
             } catch(e) {}
         }
 
-        function toggleCustomFoodForm() {
-            document.getElementById('customFoodForm').classList.toggle('hidden');
-        }
+        function toggleCustomFoodForm() { document.getElementById('customFoodForm').classList.toggle('hidden'); }
 
         function aiEstimateCustomFood() {
             const name = document.getElementById('newFoodName').value.trim();
@@ -463,7 +469,6 @@
                 `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`
             );
 
-            // ส่งเบื้องหลังแบบไม่บล็อก UI
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify({ action: "addCustomFood", payload: { name, calPerUnit, unit } })
@@ -478,17 +483,12 @@
             document.getElementById('customModal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('customModal').classList.add('hidden');
-        }
+        function closeModal() { document.getElementById('customModal').classList.add('hidden'); }
 
         async function handleLoginSilent(username) {
             try {
                 const res = await fetch(`${API_URL}?action=checkUser&username=${encodeURIComponent(username)}`).then(r => r.json());
-                if (res && res.exists) {
-                    currentProfile = res.profile;
-                    showApp();
-                }
+                if (res && res.exists) { currentProfile = res.profile; showApp(); }
             } catch(e) {}
         }
 
@@ -546,15 +546,17 @@
             const username = document.getElementById('regUsername').value.trim();
             if (!username) { alert('กรุณาตั้งชื่อผู้ใช้งาน'); return; }
 
-            const age = document.getElementById('regAge').value;
-            const gender = document.getElementById('regGender').value;
-            const weight = document.getElementById('regWeight').value;
-            const height = document.getElementById('regHeight').value;
-            const goal = document.getElementById('regGoal').value;
-            const targetWeightLoss = document.getElementById('regTargetLoss').value || 0;
-            const targetCalories = document.getElementById('regTargetCalories').value || 1500;
-
-            const payload = { username, age, gender, weight, height, activity: "1.55", goal, targetWeightLoss, targetCalories };
+            const payload = { 
+                username, 
+                age: document.getElementById('regAge').value, 
+                gender: document.getElementById('regGender').value, 
+                weight: document.getElementById('regWeight').value, 
+                height: document.getElementById('regHeight').value, 
+                activity: "1.55", 
+                goal: document.getElementById('regGoal').value, 
+                targetWeightLoss: document.getElementById('regTargetLoss').value || 0, 
+                targetCalories: document.getElementById('regTargetCalories').value || 1500 
+            };
 
             try {
                 const res = await fetch(API_URL, {
@@ -566,9 +568,7 @@
                     currentProfile = res.profile;
                     localStorage.setItem('fitnavy_username', currentProfile.username);
                     showApp();
-                } else {
-                    alert(res ? res.message : "เกิดข้อผิดพลาด");
-                }
+                } else { alert(res ? res.message : "เกิดข้อผิดพลาด"); }
             } catch(e) { alert("เชื่อมต่อขัดข้อง"); }
         }
 
@@ -622,6 +622,7 @@
             } else if (page === 'progress') {
                 document.getElementById('pageProgress').classList.remove('hidden');
                 document.getElementById('navProgress').className = "flex flex-col items-center gap-1 text-blue-900 font-bold text-[10px] transition";
+                loadHistoryData(); // โหลดข้อมูลประวัติสรุปรายวันเมื่อกดเข้ามาหน้านี้
             }
         }
 
@@ -640,14 +641,7 @@
             let totalEaten = 0;
             let totalBurn = 0;
             let hasWeight = false;
-            let mealsMap = {
-                "มื้อเช้า": [],
-                "มื้อเที่ยง": [],
-                "มื้อเย็น": [],
-                "ของว่าง/เครื่องดื่ม": [],
-                "กิจกรรมออกกำลังกาย": [],
-                "บันทึกน้ำหนักตัว": []
-            };
+            let mealsMap = { "มื้อเช้า": [], "มื้อเที่ยง": [], "มื้อเย็น": [], "ของว่าง/เครื่องดื่ม": [], "กิจกรรมออกกำลังกาย": [], "บันทึกน้ำหนักตัว": [] };
 
             items.forEach((item) => {
                 if (item.type === 'food') {
@@ -672,41 +666,31 @@
 
             mealKeys.forEach(meal => {
                 if (mealsMap[meal].length > 0) {
-                    html += `
-                        <div id="group-${meal}" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
-                            <div class="font-bold text-xs text-blue-900 border-b border-slate-100 pb-1.5 flex justify-between">
-                                <span>📌 ${meal}</span>
-                                <span class="text-[10px] text-slate-400 font-normal">${mealsMap[meal].length} รายการ</span>
-                            </div>
-                            <div class="space-y-1.5">`;
+                    html += `<div id="group-${meal}" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm space-y-2">
+                                <div class="font-bold text-xs text-blue-900 border-b border-slate-100 pb-1.5 flex justify-between">
+                                    <span>📌 ${meal}</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">${mealsMap[meal].length} รายการ</span>
+                                </div>
+                                <div class="space-y-1.5">`;
                     
                     mealsMap[meal].forEach(sub => {
                         let badgeColor = "text-rose-600 bg-rose-50 border-rose-100";
-                        let prefix = "-";
-                        let unitSuffix = "kcal";
+                        let prefix = "-"; let unitSuffix = "kcal";
 
-                        if (sub.type === 'exercise') {
-                            badgeColor = "text-emerald-600 bg-emerald-50 border-emerald-100";
-                            prefix = "+";
-                        } else if (sub.type === 'weight') {
-                            badgeColor = "text-blue-900 bg-blue-50 border-blue-100";
-                            prefix = "";
-                            unitSuffix = "กก.";
-                        }
+                        if (sub.type === 'exercise') { badgeColor = "text-emerald-600 bg-emerald-50 border-emerald-100"; prefix = "+"; } 
+                        else if (sub.type === 'weight') { badgeColor = "text-blue-900 bg-blue-50 border-blue-100"; prefix = ""; unitSuffix = "กก."; }
 
-                        html += `
-                            <div id="row-item-${sub.rowIndex}" class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
-                                <div>
-                                    <span class="font-semibold text-slate-800">${sub.name}</span>
-                                    <span class="text-slate-500 block text-[10px] font-light">${sub.detail}</span>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <span class="${badgeColor} font-bold px-2 py-0.5 rounded-lg border text-[11px]">${prefix}${sub.calories} ${unitSuffix}</span>
-                                    <button onclick="confirmDeleteItem(${sub.rowIndex}, '${sub.name}', ${sub.calories}, '${sub.type}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
-                                </div>
-                            </div>`;
+                        html += `<div id="row-item-${sub.rowIndex}" class="flex justify-between items-center text-xs bg-slate-50 p-2 rounded-xl border border-slate-100">
+                                    <div>
+                                        <span class="font-semibold text-slate-800">${sub.name}</span>
+                                        <span class="text-slate-500 block text-[10px] font-light">${sub.detail}</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="${badgeColor} font-bold px-2 py-0.5 rounded-lg border text-[11px]">${prefix}${sub.calories} ${unitSuffix}</span>
+                                        <button onclick="confirmDeleteItem(${sub.rowIndex}, '${sub.name}', ${sub.calories}, '${sub.type}')" class="text-rose-400 hover:text-rose-700 font-bold px-1" title="ลบรายการ">✕</button>
+                                    </div>
+                                </div>`;
                     });
-
                     html += `</div></div>`;
                 }
             });
@@ -791,11 +775,7 @@
         function renderFoodDropdownResults(list) {
             const container = document.getElementById('foodDropdownResults');
             container.innerHTML = '';
-            
-            if (list.length === 0) {
-                container.innerHTML = `<div class="p-2 text-xs text-slate-400 text-center">ไม่พบเมนูนี้ในระบบ</div>`;
-                return;
-            }
+            if (list.length === 0) { container.innerHTML = `<div class="p-2 text-xs text-slate-400 text-center">ไม่พบเมนูนี้ในระบบ</div>`; return; }
 
             list.forEach((food) => {
                 const originalIdx = foodDatabase.findIndex(f => f.name === food.name);
@@ -815,9 +795,7 @@
         document.addEventListener('click', function(e) {
             const box = document.getElementById('foodSearchBox');
             const dropdown = document.getElementById('foodDropdownResults');
-            if (box && dropdown && !box.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.add('hidden');
-            }
+            if (box && dropdown && !box.contains(e.target) && !dropdown.contains(e.target)) dropdown.classList.add('hidden');
         });
 
         function addFoodToBatch() {
@@ -825,14 +803,12 @@
             const searchVal = document.getElementById('foodSearchBox').value.trim();
             
             if (!searchVal || isNaN(idx) || !foodDatabase[idx]) { 
-                showModal("แจ้งเตือน", "กรุณาคลิกเลือกเมนูอาหารจากรายการ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
+                showModal("แจ้งเตือน", "กรุณาคลิกเลือกเมนูอาหารจากรายการ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`); return; 
             }
 
             const amount = parseFloat(document.getElementById('foodAmount').value);
             if (isNaN(amount) || amount <= 0) { 
-                showModal("แจ้งเตือน", "กรุณาระบุปริมาณที่ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
+                showModal("แจ้งเตือน", "กรุณาระบุปริมาณที่ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`); return; 
             }
 
             const food = foodDatabase[idx];
@@ -846,10 +822,7 @@
 
         function renderBatchList() {
             const box = document.getElementById('batchFoodList');
-            if (selectedBatchFoods.length === 0) {
-                box.innerHTML = '<div class="text-center text-slate-400 py-3">ยังไม่ได้เลือกรายการ</div>';
-                return;
-            }
+            if (selectedBatchFoods.length === 0) { box.innerHTML = '<div class="text-center text-slate-400 py-3">ยังไม่ได้เลือกรายการ</div>'; return; }
 
             let html = '';
             selectedBatchFoods.forEach((item, index) => {
@@ -865,26 +838,18 @@
             box.innerHTML = html;
         }
 
-        // ⚡ Optimistic UI: อัปเดตหน้าจอทันที ไม่ต้องรอเน็ต
         async function submitBatchFood() {
             if (selectedBatchFoods.length === 0) { 
-                showModal("แจ้งเตือน", "กรุณาเลือกรายการอาหารก่อนครับ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
+                showModal("แจ้งเตือน", "กรุณาเลือกรายการอาหารก่อนครับ", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`); return; 
             }
 
             const mealType = document.getElementById('foodMealType').value;
             const selectedDate = document.getElementById('selectDate').value;
 
             const payloadList = selectedBatchFoods.map(item => ({
-                username: currentProfile.username,
-                date: selectedDate,
-                type: 'food',
-                name: item.name,
-                calories: item.calories,
-                detail: `${mealType} (${item.amount} ${item.unit})`
+                username: currentProfile.username, date: selectedDate, type: 'food', name: item.name, calories: item.calories, detail: `${mealType} (${item.amount} ${item.unit})`
             }));
 
-            // จำลองข้อมูลใส่ local ทันทีเพื่อให้แดชบอร์ดอัปเดตไวสุดๆ
             payloadList.forEach(p => todayItems.push(p));
             selectedBatchFoods = [];
             renderBatchList();
@@ -897,25 +862,23 @@
                 `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">ตกลง</button>`
             );
 
-            // ส่งเบื้องหลังเงียบๆ
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "saveBatch", payload: payloadList })
-            }).catch(e => {});
+            fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: payloadList }) }).catch(e => {});
         }
 
         async function submitWeight() {
             const w = parseFloat(document.getElementById('inputWeightVal').value);
             const date = document.getElementById('selectDate').value;
             if (isNaN(w) || w <= 0) { 
-                showModal("แจ้งเตือน", "กรุณากรอกน้ำหนักให้ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
+                showModal("แจ้งเตือน", "กรุณากรอกน้ำหนักให้ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`); return; 
             }
 
             document.getElementById('inputWeightVal').value = '';
             calculateBMI(w, currentProfile.height);
             todayItems.push({ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' });
             renderDashboard(todayItems);
+            
+            // โหลดประวัติใหม่เผื่อกรณีอยู่ในหน้าความคืบหน้า
+            loadHistoryData();
 
             showModal(
                 "✅ สำเร็จ",
@@ -924,10 +887,7 @@
                 `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
             );
 
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }] })
-            }).catch(e => {});
+            fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }] }) }).catch(e => {});
         }
 
         async function submitExercise() {
@@ -936,8 +896,7 @@
             const date = document.getElementById('selectDate').value;
 
             if (isNaN(min) || min <= 0) { 
-                showModal("แจ้งเตือน", "กรุณากรอกระยะเวลาออกกำลังกาย", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`);
-                return; 
+                showModal("แจ้งเตือน", "กรุณากรอกระยะเวลาออกกำลังกาย", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`); return; 
             }
 
             let exName = 'วิ่ง'; let calMin = 10;
@@ -957,18 +916,74 @@
                 `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
             );
 
-            fetch(API_URL, {
-                method: "POST",
-                body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: totalExCal, detail: `ออกกำลังกาย ${min} นาที` }] })
-            }).catch(e => {});
+            fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: totalExCal, detail: `ออกกำลังกาย ${min} นาที` }] }) }).catch(e => {});
         }
 
-        function generateSmartAIMenu(mealTarget) {
-            if (foodDatabase.length === 0) {
-                document.getElementById('aiMenuBox').innerHTML = `<div class="text-rose-600">⚠️ กำลังโหลดคลังข้อมูล... กรุณาลองใหม่อีกครั้ง</div>`;
+        // ⚡ NEW ฟังก์ชันดึงและแสดงผลประวัติรายวัน
+        async function loadHistoryData() {
+            if (!currentProfile) return;
+            const container = document.getElementById('historyList');
+            container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6">กำลังโหลดข้อมูล...</div>';
+            
+            try {
+                const res = await fetch(`${API_URL}?action=getHistory&username=${encodeURIComponent(currentProfile.username)}`).then(r => r.json());
+                historyCache = res || [];
+                renderHistoryList(historyCache);
+            } catch(e) {
+                container.innerHTML = '<div class="text-center text-xs text-rose-400 py-6">โหลดข้อมูลไม่สำเร็จ กรุณาลองใหม่</div>';
+            }
+        }
+
+        function renderHistoryList(data) {
+            const container = document.getElementById('historyList');
+            if (data.length === 0) {
+                container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6">ยังไม่มีประวัติการบันทึก</div>';
                 return;
             }
 
+            let html = '';
+            const startWeight = parseFloat(currentProfile.weight) || 0;
+
+            data.forEach(day => {
+                let weightText = '-';
+                let diffText = '';
+                
+                if (day.weight > 0) {
+                    weightText = `${day.weight} กก.`;
+                    const diff = (day.weight - startWeight).toFixed(1);
+                    
+                    if (diff > 0) {
+                        diffText = `<span class="text-rose-500 font-bold ml-1 text-[10px]">(+${diff})</span>`;
+                    } else if (diff < 0) {
+                        diffText = `<span class="text-emerald-500 font-bold ml-1 text-[10px]">(${diff})</span>`;
+                    } else {
+                        diffText = `<span class="text-slate-400 font-bold ml-1 text-[10px]">(คงที่)</span>`;
+                    }
+                }
+
+                html += `
+                    <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 text-xs space-y-2">
+                        <div class="font-bold text-blue-900 border-b border-slate-200 pb-1.5 flex justify-between items-center">
+                            <span>📅 ${day.date}</span>
+                            <span>⚖️ ${weightText} ${diffText}</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-center">
+                            <div class="bg-white py-2 rounded-xl border border-slate-100 shadow-sm">
+                                <span class="block text-[10px] text-slate-500 mb-0.5">🍽️ กินไป</span>
+                                <span class="font-bold text-rose-600">${day.eaten} kcal</span>
+                            </div>
+                            <div class="bg-white py-2 rounded-xl border border-slate-100 shadow-sm">
+                                <span class="block text-[10px] text-slate-500 mb-0.5">🏃 เผาผลาญ</span>
+                                <span class="font-bold text-emerald-600">${day.burned} kcal</span>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function generateSmartAIMenu(mealTarget) {
+            // โค้ดเดิม...
             let eaten = 0;
             todayItems.forEach(i => { if (i.type === 'food') eaten += i.calories; });
             let remaining = Number(currentProfile.targetCalories) - eaten;
@@ -980,7 +995,7 @@
 
             if (remaining > 0 && remaining < targetMealCal) targetMealCal = Math.max(200, remaining);
 
-            const findFood = (keyword) => foodDatabase.find(f => f.name.includes(keyword));
+            const findFood = (keyword) => foodDatabase.find(f => f.name.includes(keyword)) || { name: keyword, calPerUnit: 1, unit: 'g' };
 
             const fChicken = findFood("อกไก่");
             const fPumpkin = findFood("ฟักทอง");
@@ -990,39 +1005,10 @@
             const fTofu = findFood("เต้าหู้ไข่");
 
             let generatedRecipes = [
-                {
-                    title: "สุกี้แห้งอกไก่เต้าหู้ไข่สูตรคลีน",
-                    items: [
-                        { obj: fGlassNoodle, grams: 80 },
-                        { obj: fChicken, grams: 100 },
-                        { obj: fTofu, grams: 70 },
-                        { obj: fMushroom, grams: 50 }
-                    ]
-                },
-                {
-                    title: "ข้าวสวยคู่ปลากะพง/อกไก่ย่าง & ฟักทองนึ่ง",
-                    items: [
-                        { obj: fRice, grams: 100 },
-                        { obj: fChicken, grams: 120 },
-                        { obj: fPumpkin, grams: 100 }
-                    ]
-                },
-                {
-                    title: "ยำวุ้นเส้นอกไก่ฉีกเห็ดเข็มทอง",
-                    items: [
-                        { obj: fGlassNoodle, grams: 70 },
-                        { obj: fChicken, grams: 100 },
-                        { obj: fMushroom, grams: 80 }
-                    ]
-                },
-                {
-                    title: "ซุปเต้าหู้ไข่อกไก่สับนึ่งฟักทอง",
-                    items: [
-                        { obj: fTofu, grams: 80 },
-                        { obj: fChicken, grams: 90 },
-                        { obj: fPumpkin, grams: 120 }
-                    ]
-                }
+                { title: "สุกี้แห้งอกไก่เต้าหู้ไข่สูตรคลีน", items: [{ obj: fGlassNoodle, grams: 80 }, { obj: fChicken, grams: 100 }, { obj: fTofu, grams: 70 }, { obj: fMushroom, grams: 50 }] },
+                { title: "ข้าวสวยคู่ปลากะพง/อกไก่ย่าง & ฟักทองนึ่ง", items: [{ obj: fRice, grams: 100 }, { obj: fChicken, grams: 120 }, { obj: fPumpkin, grams: 100 }] },
+                { title: "ยำวุ้นเส้นอกไก่ฉีกเห็ดเข็มทอง", items: [{ obj: fGlassNoodle, grams: 70 }, { obj: fChicken, grams: 100 }, { obj: fMushroom, grams: 80 }] },
+                { title: "ซุปเต้าหู้ไข่อกไก่สับนึ่งฟักทอง", items: [{ obj: fTofu, grams: 80 }, { obj: fChicken, grams: 90 }, { obj: fPumpkin, grams: 120 }] }
             ];
 
             const recipe = generatedRecipes[Math.floor(Math.random() * generatedRecipes.length)];
@@ -1031,15 +1017,12 @@
             let detailsHTML = `<strong class="text-blue-950">✨ เมนูแนะนำสำหรับ (${mealTarget}): ${recipe.title}</strong><ul class="mt-1.5 space-y-1 pl-4 list-disc text-slate-600">`;
 
             recipe.items.forEach(i => {
-                if (i.obj) {
-                    let cal = Math.round(i.obj.calPerUnit * i.grams);
-                    totalRecipeCal += cal;
-                    detailsHTML += `<li><b>${i.obj.name}</b>: ${i.grams} ${i.obj.unit} (~${cal} kcal)</li>`;
-                }
+                let cal = Math.round(i.obj.calPerUnit * i.grams);
+                totalRecipeCal += cal;
+                detailsHTML += `<li><b>${i.obj.name}</b>: ${i.grams} ${i.obj.unit} (~${cal} kcal)</li>`;
             });
 
             detailsHTML += `</ul><div class="mt-2 pt-2 border-t border-blue-100 flex justify-between items-center text-[11px] font-bold text-emerald-800"><span>พลังงานรวม: ~${totalRecipeCal} kcal</span><span>โควตามื้อนี้: ~${targetMealCal} kcal</span></div>`;
-
             document.getElementById('aiMenuBox').innerHTML = detailsHTML;
         }
 
