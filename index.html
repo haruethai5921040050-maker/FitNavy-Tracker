@@ -266,7 +266,7 @@
                 <!-- PAGE 3: PROGRESS & WEIGHT -->
                 <div id="pageProgress" class="space-y-4 hidden">
                     
-                    <!-- NEW SECTION: สรุปประวัติรายวัน/สัปดาห์/เดือน พร้อมฟิลเตอร์ -->
+                    <!-- สรุปประวัติย้อนหลัง -->
                     <div class="bg-white p-5 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-2.5">
                             <h3 class="text-xs font-bold text-slate-900">🗓️ สรุปประวัติย้อนหลัง</h3>
@@ -315,15 +315,26 @@
                         <button onclick="submitExercise()" class="w-full bg-blue-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">บันทึกออกกำลังกาย</button>
                     </div>
 
-                    <div class="navy-gradient text-white p-5 rounded-3xl space-y-2 text-xs shadow-lg mb-4">
-                        <span class="font-bold text-blue-200 block border-b border-white/10 pb-2">📊 ข้อมูลโปรไฟล์</span>
+                    <!-- 🤍 ปรับเปลี่ยนเป็นโทนสีขาว + เพิ่ม % ความคืบหน้า & คำให้กำลังใจ -->
+                    <div class="bg-white text-slate-800 p-5 rounded-3xl space-y-2.5 text-xs shadow-sm border border-slate-200/80 mb-4">
+                        <span class="font-bold text-blue-900 block border-b border-slate-100 pb-2">📊 ข้อมูลโปรไฟล์และความคืบหน้า</span>
                         <div class="flex justify-between pt-1">
-                            <span class="text-slate-300">เริ่มทำตั้งแต่:</span>
-                            <span id="progStartDate" class="font-medium">-</span>
+                            <span class="text-slate-500">เริ่มทำตั้งแต่:</span>
+                            <span id="progStartDate" class="font-semibold text-slate-800">-</span>
                         </div>
                         <div class="flex justify-between">
-                            <span class="text-slate-300">เป้าหมาย:</span>
-                            <span id="progGoalText" class="font-medium">-</span>
+                            <span class="text-slate-500">เป้าหมาย:</span>
+                            <span id="progGoalText" class="font-semibold text-slate-800">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">ความคืบหน้าเป้าหมาย:</span>
+                            <span id="progPercentText" class="font-bold text-blue-900">-</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                            <div id="progBar" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="pt-2 border-t border-slate-100 text-center">
+                            <p class="text-[11px] font-semibold text-indigo-600">✨ สู้ต่อไป คนสวยคนหล่อ คุณทำได้แน่นอน! 💪</p>
                         </div>
                     </div>
                 </div>
@@ -604,6 +615,7 @@
             document.getElementById('progGoalText').innerText = goalStr;
 
             calculateBMI(currentProfile.weight, currentProfile.height);
+            updateGoalProgressUI(currentProfile.weight);
             loadDashboardData();
         }
 
@@ -654,6 +666,7 @@
             let totalEaten = 0;
             let totalBurn = 0;
             let hasWeight = false;
+            let latestWeightVal = parseFloat(currentProfile.weight) || 0;
             let mealsMap = { "มื้อเช้า": [], "มื้อเที่ยง": [], "มื้อเย็น": [], "ของว่าง/เครื่องดื่ม": [], "กิจกรรมออกกำลังกาย": [], "บันทึกน้ำหนักตัว": [] };
 
             items.forEach((item) => {
@@ -668,10 +681,13 @@
                     mealsMap["กิจกรรมออกกำลังกาย"].push(item);
                 } else if (item.type === 'weight') {
                     hasWeight = true;
+                    latestWeightVal = item.calories;
                     mealsMap["บันทึกน้ำหนักตัว"].push(item);
                     calculateBMI(item.calories, currentProfile.height);
                 }
             });
+
+            updateGoalProgressUI(latestWeightVal);
 
             let html = '';
             const mealKeys = ["มื้อเช้า", "มื้อเที่ยง", "มื้อเย็น", "ของว่าง/เครื่องดื่ม", "กิจกรรมออกกำลังกาย", "บันทึกน้ำหนักตัว"];
@@ -734,6 +750,27 @@
             } else { compensateBox.classList.add('hidden'); }
 
             if (remaining < 350 && remaining >= 0) { document.getElementById('badgeBuffer').classList.remove('hidden'); } else { document.getElementById('badgeBuffer').classList.add('hidden'); }
+        }
+
+        // 📊 ฟังก์ชันคำนวณและอัปเดต % ความคืบหน้าของเป้าหมายน้ำหนัก
+        function updateGoalProgressUI(currentWeight) {
+            if (!currentProfile) return;
+            const startWeight = parseFloat(currentProfile.weight) || 0;
+            const targetLoss = parseFloat(currentProfile.targetWeightLoss) || 0;
+
+            if (targetLoss <= 0) {
+                document.getElementById('progPercentText').innerText = "รักษาน้ำหนัก";
+                document.getElementById('progBar').style.width = "100%";
+                return;
+            }
+
+            const totalLost = startWeight - currentWeight;
+            let percent = Math.round((totalLost / targetLoss) * 100);
+            if (percent < 0) percent = 0;
+            if (percent > 100) percent = 100;
+
+            document.getElementById('progPercentText').innerText = `สำเร็จแล้ว ${percent}% (ลดไป ${totalLost.toFixed(1)}/${targetLoss} กก.)`;
+            document.getElementById('progBar').style.width = `${percent}%`;
         }
 
         function confirmDeleteItem(rowIndex, itemName, itemCal, itemType) {
@@ -887,6 +924,7 @@
 
             document.getElementById('inputWeightVal').value = '';
             calculateBMI(w, currentProfile.height);
+            updateGoalProgressUI(w);
             todayItems.push({ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' });
             renderDashboard(todayItems);
             loadHistoryData();
@@ -949,7 +987,7 @@
             const monthSelect = document.getElementById('historyMonthFilter');
             let months = new Set();
             data.forEach(item => {
-                if (item.date) months.add(item.date.substring(0, 7)); // เก็บรูปแบบ YYYY-MM
+                if (item.date) months.add(item.date.substring(0, 7));
             });
 
             let html = '<option value="all">ทุกเดือน / ทุกช่วง</option>';
@@ -959,7 +997,6 @@
             monthSelect.innerHTML = html;
         }
 
-        // ฟังก์ชันคำนวณหมายเลขสัปดาห์ของปี
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
@@ -978,7 +1015,6 @@
                 return;
             }
 
-            // กรองตามเดือนที่เลือก
             let filteredData = historyCache.filter(item => {
                 if (monthFilter === 'all') return true;
                 return item.date.startsWith(monthFilter);
@@ -1007,7 +1043,7 @@
                     weekMap[wKey].eatenSum += d.eaten;
                     weekMap[wKey].burnSum += d.burned;
                     weekMap[wKey].count += 1;
-                    if (d.weight > 0) weekMap[wKey].latestWeight = d.weight; // เอาค่าน้ำหนักล่าสุดในสัปดาห์
+                    if (d.weight > 0) weekMap[wKey].latestWeight = d.weight;
                 });
 
                 displayData = Object.keys(weekMap).sort().reverse().map(w => ({
