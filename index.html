@@ -315,7 +315,6 @@
                         <button onclick="submitExercise()" class="w-full bg-blue-900 text-white py-3 rounded-2xl text-xs font-semibold shadow-md">บันทึกออกกำลังกาย</button>
                     </div>
 
-                    <!-- 🤍 ปรับเปลี่ยนเป็นโทนสีขาว + เพิ่ม % ความคืบหน้า & คำให้กำลังใจ -->
                     <div class="bg-white text-slate-800 p-5 rounded-3xl space-y-2.5 text-xs shadow-sm border border-slate-200/80 mb-4">
                         <span class="font-bold text-blue-900 block border-b border-slate-100 pb-2">📊 ข้อมูลโปรไฟล์และความคืบหน้า</span>
                         <div class="flex justify-between pt-1">
@@ -389,7 +388,9 @@
             { name: "เต้าหู้ไข่", calPerUnit: 0.85, unit: "g" },
             { name: "ไข่ต้ม", calPerUnit: 1.55, unit: "g" },
             { name: "สลัดอกไก่", calPerUnit: 350, unit: "จาน" },
-            { name: "แกงจืดเต้าหู้หมูสับ", calPerUnit: 180, unit: "จาน" }
+            { name: "แกงจืดเต้าหู้หมูสับ", calPerUnit: 180, unit: "จาน" },
+            { name: "ชาไทย (ชานมหวาน 100)", calPerUnit: 250, unit: "แก้ว" },
+            { name: "ชานมไข่มุก", calPerUnit: 350, unit: "แก้ว" }
         ];
 
         window.onload = function() {
@@ -440,7 +441,7 @@
                 else if (lower.includes('หมู')) calculatedCal = 2.50;
                 else calculatedCal = 1.00;
             } else if (unit === 'แก้ว') {
-                if (lower.includes('กาแฟ') || lower.includes('ชาไทย')) calculatedCal = 150;
+                if (lower.includes('กาแฟ') || lower.includes('ชาไทย') || lower.includes('ชานม')) calculatedCal = 220;
                 else if (lower.includes('โปรตีน')) calculatedCal = 200;
                 else calculatedCal = 120;
             } else if (unit === 'ชิ้น') {
@@ -752,7 +753,6 @@
             if (remaining < 350 && remaining >= 0) { document.getElementById('badgeBuffer').classList.remove('hidden'); } else { document.getElementById('badgeBuffer').classList.add('hidden'); }
         }
 
-        // 📊 ฟังก์ชันคำนวณและอัปเดต % ความคืบหน้าของเป้าหมายน้ำหนัก
         function updateGoalProgressUI(currentWeight) {
             if (!currentProfile) return;
             const startWeight = parseFloat(currentProfile.weight) || 0;
@@ -868,6 +868,17 @@
             document.getElementById('foodSearchBox').value = '';
             document.getElementById('foodAmount').value = '1';
             renderBatchList();
+
+            // 🧋 ฟีเจอร์ลูกเล่นตรวจจับของหวาน/ชาไทย/ชานม/น้ำหวาน
+            const lowerName = food.name.toLowerCase();
+            if (lowerName.includes('ชาไทย') || lowerName.includes('ชานม') || lowerName.includes('ไข่มุก') || lowerName.includes('น้ำหวาน') || lowerName.includes('ของหวาน') || lowerName.includes('เค้ก') || lowerName.includes('เบเกอรี่')) {
+                showModal(
+                    "🚨 ฮั่นแน่! แอบกินของหวานเหรอ?",
+                    `<b>"${food.name}"</b> อุดมไปด้วยน้ำตาลและแคลอรีสูงปรี๊ด! ฮั่นแน่กินของหวานนี่นา ระวังอ้วนนะคนสวยคนหล่อ! 😉🍰`,
+                    "🧋",
+                    `<button onclick="closeModal()" class="col-span-2 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">รู้ตัวแล้ว... จะตั้งใจลดนะ! 😅</button>`
+                );
+            }
         }
 
         function renderBatchList() {
