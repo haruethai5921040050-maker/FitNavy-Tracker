@@ -379,18 +379,8 @@
         let historyCache = [];
         
         let foodDatabase = [
-            { name: "ฟักทองนึ่ง", calPerUnit: 0.50, unit: "g" },
-            { name: "เห็ดเข็มทองนึ่ง", calPerUnit: 0.35, unit: "g" },
-            { name: "อกไก่", calPerUnit: 1.65, unit: "g" },
-            { name: "ข้าวสวย", calPerUnit: 1.30, unit: "g" },
-            { name: "ไส้กรอก", calPerUnit: 3.00, unit: "g" },
-            { name: "วุ้นเส้น", calPerUnit: 1.00, unit: "g" },
-            { name: "เต้าหู้ไข่", calPerUnit: 0.85, unit: "g" },
-            { name: "ไข่ต้ม", calPerUnit: 1.55, unit: "g" },
-            { name: "สลัดอกไก่", calPerUnit: 350, unit: "จาน" },
-            { name: "แกงจืดเต้าหู้หมูสับ", calPerUnit: 180, unit: "จาน" },
-            { name: "ชาไทย (ชานมหวาน 100)", calPerUnit: 250, unit: "แก้ว" },
-            { name: "ชานมไข่มุก", calPerUnit: 350, unit: "แก้ว" }
+            { name: "อกไก่", calPerUnit: 1.65, unit: "g", warning: "" },
+            { name: "ข้าวสวย", calPerUnit: 1.30, unit: "g", warning: "" }
         ];
 
         window.onload = function() {
@@ -482,7 +472,7 @@
                 return;
             }
 
-            foodDatabase.push({ name, calPerUnit, unit });
+            foodDatabase.push({ name, calPerUnit, unit, warning: "" });
             document.getElementById('newFoodName').value = '';
             document.getElementById('newFoodCal').value = '';
             toggleCustomFoodForm();
@@ -869,12 +859,11 @@
             document.getElementById('foodAmount').value = '1';
             renderBatchList();
 
-            // 🧋 ฟีเจอร์ลูกเล่นตรวจจับของหวาน/ชาไทย/ชานม/น้ำหวาน
-            const lowerName = food.name.toLowerCase();
-            if (lowerName.includes('ชาไทย') || lowerName.includes('ชานม') || lowerName.includes('ไข่มุก') || lowerName.includes('น้ำหวาน') || lowerName.includes('ของหวาน') || lowerName.includes('เค้ก') || lowerName.includes('เบเกอรี่')) {
+            // 🚨 ตรวจสอบข้อความเตือนจาก Google Sheets (Column D: warning)
+            if (food.warning && food.warning !== "") {
                 showModal(
-                    "🚨 ฮั่นแน่! แอบกินของหวานเหรอ?",
-                    `<b>"${food.name}"</b> อุดมไปด้วยน้ำตาลและแคลอรีสูงปรี๊ด! ฮั่นแน่กินของหวานนี่นา ระวังอ้วนนะคนสวยคนหล่อ! 😉🍰`,
+                    "🚨 ฮั่นแน่! แอบกินของอร่อยเหรอ?",
+                    `เมนู <b>"${food.name}"</b><br><br><span class="text-rose-600 font-bold">${food.warning}</span>`,
                     "🧋",
                     `<button onclick="closeModal()" class="col-span-2 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">รู้ตัวแล้ว... จะตั้งใจลดนะ! 😅</button>`
                 );
