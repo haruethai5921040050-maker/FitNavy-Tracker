@@ -48,7 +48,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1.5">ชื่อผู้ใช้งาน (Username)</label>
-                        <input type="text" id="loginUsername" placeholder="เช่น john_navy" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800/30 focus:border-blue-800 transition">
+                        <input type="text" id="loginUsername" placeholder="เช่น Bell หรือ john_navy" class="w-full bg-slate-50 border border-slate-300/80 rounded-2xl px-4 py-3 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800/30 focus:border-blue-800 transition">
                     </div>
                     <div id="loginError" class="text-xs text-rose-600 font-medium hidden text-center bg-rose-50 p-3 rounded-2xl border border-rose-200/80">❌ ไม่พบชื่อนี้ในระบบ รบกวนกดสร้างโปรไฟล์ใหม่ก่อนครับ</div>
                     <button id="btnLoginSubmit" onclick="handleLogin()" class="w-full bg-blue-900 hover:bg-blue-800 active:scale-[0.98] text-white font-semibold py-3 rounded-2xl transition shadow-lg shadow-blue-900/20 text-sm">เข้าสู่ระบบ</button>
@@ -62,7 +62,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-700 mb-1">ตั้งชื่อผู้ใช้งาน (Username)</label>
-                        <input type="text" id="regUsername" placeholder="เช่น john_navy" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-slate-800 text-xs">
+                        <input type="text" id="regUsername" placeholder="เช่น Bell" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2 text-slate-800 text-xs">
                     </div>
                     <div class="grid grid-cols-2 gap-2.5">
                         <div>
@@ -383,6 +383,11 @@
             { name: "ข้าวสวย", calPerUnit: 1.30, unit: "g", warning: "" }
         ];
 
+        function isBellAccount() {
+            if (!currentProfile || !currentProfile.username) return false;
+            return currentProfile.username.toString().trim().toLowerCase() === 'bell';
+        }
+
         window.onload = function() {
             const todayStr = new Date().toISOString().split('T')[0];
             document.getElementById('selectDate').value = todayStr;
@@ -443,13 +448,17 @@
 
             document.getElementById('newFoodCal').value = calculatedCal;
 
+            const titleText = isBellAccount() ? "🤖 AI คำนวณให้แล้วนะที่รัก" : "🤖 AI คำนวณแคลอรีสำเร็จ";
+            const msgText = isBellAccount() ? `เมนู <b>"${name}"</b> (ต่อ 1 ${unit}) ได้ <b>${calculatedCal} kcal</b> ครับที่รัก บันทึกเลยไหมคะ?` : `เมนู <b>"${name}"</b> (ต่อ 1 ${unit}) AI ประเมินได้ <b>${calculatedCal} kcal</b> ต้องการบันทึกเมนูเลยไหมครับ?`;
+            const btnText = isBellAccount() ? "บันทึกเลยค่ะที่รัก 🥰" : "บันทึกเมนูเลย";
+
             showModal(
-                "🤖 AI คำนวณแคลอรีสำเร็จ",
-                `เมนู <b>"${name}"</b> (ต่อ 1 ${unit}) AI ประเมินได้ <b>${calculatedCal} kcal</b> ต้องการบันทึกเมนูเลยไหมครับ?`,
+                titleText,
+                msgText,
                 "✨",
                 `
                 <button onclick="closeModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 py-2.5 rounded-xl font-semibold text-xs transition">ยกเลิก</button>
-                <button onclick="confirmAddCustomFood('${name}', ${calculatedCal}, '${unit}')" class="bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">บันทึกเมนูเลย</button>
+                <button onclick="confirmAddCustomFood('${name}', ${calculatedCal}, '${unit}')" class="bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">${btnText}</button>
                 `
             );
         }
@@ -477,12 +486,11 @@
             document.getElementById('newFoodCal').value = '';
             toggleCustomFoodForm();
 
-            showModal(
-                "✅ สำเร็จ",
-                `เพิ่มเมนู "${name}" เรียบร้อยแล้วครับ!`,
-                "🍲",
-                `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`
-            );
+            const titleText = isBellAccount() ? "🥰 เก่งมากครับที่รัก" : "✅ สำเร็จ";
+            const msgText = isBellAccount() ? `เพิ่มเมนู "${name}" เรียบร้อยแล้วครับที่รัก เก่งที่สุดเลย! 💖` : `เพิ่มเมนู "${name}" เรียบร้อยแล้วครับ!`;
+            const btnText = isBellAccount() ? "ขอบคุณค่ะที่รัก 😘" : "ตกลง";
+
+            showModal(titleText, msgText, "🍲", `<button onclick="closeModal()" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl text-xs font-semibold">${btnText}</button>`);
 
             fetch(API_URL, {
                 method: "POST",
@@ -592,7 +600,13 @@
             document.getElementById('appSection').classList.remove('hidden');
             document.getElementById('bottomNav').classList.remove('hidden');
             document.getElementById('btnLogout').classList.remove('hidden');
-            document.getElementById('userDisplay').innerText = `ผู้ใช้งาน: ${currentProfile.username} (${currentProfile.targetCalories} kcal/วัน)`;
+
+            // 💖 ข้อความต้อนรับเฉพาะคุณ Bell ส่วนคนอื่นแสดงชื่อปกติ
+            if (isBellAccount()) {
+                document.getElementById('userDisplay').innerText = `สวัสดีครับที่รัก (Bell) ❤️ วันนี้ลงเมนูครบหรือยังครับ?`;
+            } else {
+                document.getElementById('userDisplay').innerText = `ผู้ใช้งาน: ${currentProfile.username} (${currentProfile.targetCalories} kcal/วัน)`;
+            }
 
             if (currentProfile.createdDate) {
                 const start = new Date(currentProfile.createdDate);
@@ -859,13 +873,27 @@
             document.getElementById('foodAmount').value = '1';
             renderBatchList();
 
-            if (food.warning && food.warning !== "") {
-                showModal(
-                    "🚨 ฮั่นแน่! แอบกินของอร่อยเหรอ?",
-                    `เมนู <b>"${food.name}"</b><br><br><span class="text-rose-600 font-bold">${food.warning}</span>`,
-                    "🧋",
-                    `<button onclick="closeModal()" class="col-span-2 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">รู้ตัวแล้ว... จะตั้งใจลดนะ! 😅</button>`
-                );
+            // 🧋 ตรวจสอบเงื่อนไข: แยกเฉพาะคุณ Bell กับผู้ใช้อื่นๆ อย่างชัดเจน
+            const lowerName = food.name.toLowerCase();
+            if (isBellAccount()) {
+                if (lowerName.includes('ทอด') || lowerName.includes('โค้ก') || lowerName.includes('ชาไทย') || lowerName.includes('ชานม') || lowerName.includes('ไข่มุก') || lowerName.includes('หวาน')) {
+                    showModal(
+                        "🚨 แอบกินของอร่อยเหรอที่รัก?",
+                        `เมนู <b>"${food.name}"</b><br><br><span class="text-rose-600 font-bold">ที่รักกินเยอะ เฟิร์สไม่รักนะ! 🤭💖</span>`,
+                        "🧋",
+                        `<button onclick="closeModal()" class="col-span-2 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">รู้ตัวแล้ว... จะยอมเชื่อฟังค่ะ! 🥹</button>`
+                    );
+                }
+            } else {
+                // สำหรับคนอื่นๆ อ่านค่าจาก Column D (warning) ใน Google Sheets ตามปกติที่เคยแก้ไว้
+                if (food.warning && food.warning !== "") {
+                    showModal(
+                        "🚨 แจ้งเตือนจากระบบ",
+                        `เมนู <b>"${food.name}"</b><br><br><span class="text-rose-600 font-bold">${food.warning}</span>`,
+                        "⚠️",
+                        `<button onclick="closeModal()" class="col-span-2 bg-rose-600 hover:bg-rose-700 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">เข้าใจแล้วครับ</button>`
+                    );
+                }
             }
         }
 
@@ -904,11 +932,16 @@
             renderBatchList();
             renderDashboard(todayItems);
 
+            // 💖 ป๊อปอัพบันทึกสำเร็จ (แยกเฉพาะ Bell กับคนอื่นๆ)
+            const titleText = isBellAccount() ? "🥰 เก่งมากครับที่รัก" : "✅ สำเร็จ";
+            const msgText = isBellAccount() ? "บันทึกเรียบร้อยครับที่รัก เก่งที่สุดเลย! 💖" : "บันทึกรายการอาหารเรียบร้อยแล้วครับ!";
+            const btnText = isBellAccount() ? "ขอบคุณค่ะที่รัก 😘" : "ตกลง";
+
             showModal(
-                "✅ สำเร็จ",
-                "บันทึกรายการอาหารเรียบร้อยแล้วครับ!",
+                titleText,
+                msgText,
                 "🎉",
-                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">ตกลง</button>`
+                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs transition shadow-md">${btnText}</button>`
             );
 
             fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: payloadList }) }).catch(e => {});
@@ -938,59 +971,23 @@
             loadHistoryData();
 
             if (isWeightDecreased) {
-                const encouragementMessages = [
-                    "เก่งมากกก! วันนี้ก็เป็นเวอร์ชันที่ดีขึ้นของตัวเองอีกวันแล้ว 💪",
-                    "สุดยอดมาก! ความพยายามของคุณกำลังออกดอกออกผลแล้วนะ 🌱",
-                    "วันนี้ทำได้ดีมาก ให้รางวัลตัวเองด้วยรอยยิ้มก็พอ 😊",
-                    "เก่งที่สุดเลย! อย่าลืมชมตัวเองบ้างนะ คนเก่งก็ต้องการกำลังใจเหมือนกัน",
-                    "อีกนิดเดียวก็เข้าใกล้เป้าหมายขึ้นแล้ว สู้ต่อไปนะ!",
-                    "ทำได้ดีมาก! วันนี้ขอให้คะแนนความตั้งใจเต็มสิบไปเลย ⭐",
-                    "ภูมิใจในตัวเองได้แล้วนะ คุณกำลังทำสิ่งดี ๆ ให้ตัวเองอยู่",
-                    "สุดปัง! วินัยเล็ก ๆ ในวันนี้ จะกลายเป็นความสำเร็จที่ยิ่งใหญ่ในวันหน้า",
-                    "เก่งมากครับ! ค่อย ๆ ลด ไม่ต้องรีบ แต่ขอให้มีความสุขด้วยนะ 😎",
-                    "วันนี้คุณชนะใจตัวเองได้อีกวันแล้ว ปรบมือให้ตัวเองดัง ๆ เลย 👏",
-                    "ทำได้ขนาดนี้แล้ว เก่งเกินต้านมากคุณน้าาา 💖",
-                    "ก้าวเล็ก ๆ ก็มีความหมาย วันนี้คุณเดินหน้าไปอีกก้าวแล้วนะ",
-                    "เยี่ยมมาก! ไม่ต้องสมบูรณ์แบบทุกวัน แค่ไม่เลิกพยายามก็เก่งแล้ว",
-                    "ขยันแบบนี้ อีกหน่อยต้องเรียกคุณคนใหม่แล้วแหละ 😉",
-                    "คุณกำลังไปได้สวยเลยนะ อย่าใจร้อนกับตัวเองล่ะ!",
-                    "เก่งมากก! วันนี้ดูแลตัวเองได้ดีแล้ว พรุ่งนี้มาสู้กันใหม่",
-                    "หนึ่งวันแห่งความตั้งใจ ขอให้ความมั่นใจเพิ่มขึ้นอีกหนึ่งระดับ 💯",
-                    "ทำดีแล้วครับ อย่าลืมว่าการพักก็เป็นส่วนหนึ่งของการดูแลตัวเองนะ",
-                    "ภารกิจวันนี้สำเร็จ! รับตำแหน่งคนเก่งประจำวันไปเลย 🏆"
-                ];
-                const randomMsg = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+                const titleText = isBellAccount() ? "✨ เก่งมากครับที่รัก" : "🎉 น้ำหนักลดลงแล้ว เยี่ยมมาก!";
+                const msgText = isBellAccount() ? "เก่งมากครับที่รัก! น้ำหนักลดลงแล้ว ภูมิใจในตัวที่รักที่สุดเลย 💖" : "เก่งมากกก! วันนี้ก็เป็นเวอร์ชันที่ดีขึ้นของตัวเองอีกวันแล้ว 💪";
+                const btnText = isBellAccount() ? "รักเฟิร์สที่สุด 🥰" : "เย้ ขอบคุณครับ! 🥳";
 
-                showModal(
-                    "🎉 น้ำหนักลดลงแล้ว เยี่ยมมาก!",
-                    `<span class="text-blue-900 font-semibold text-sm">${randomMsg}</span>`,
-                    "🌟",
-                    `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">เย้ ขอบคุณครับ! 🥳</button>`
-                );
+                showModal(titleText, `<span class="text-blue-900 font-semibold text-sm">${msgText}</span>`, "🌟", `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">${btnText}</button>`);
             } else if (isWeightIncreased) {
-                // 💙 โหมดปลอบใจเมื่อน้ำหนักมากกว่าเดิม (สุ่ม 5 แบบ)
-                const comfortMessages = [
-                    "ไม่เป็นไรนะ น้ำหนักขึ้นได้ ก็ลดลงได้ สู้ต่อไปนะ ❤️",
-                    "อย่าเพิ่งท้อนะ ความพยายามของคุณยังมีความหมายเสมอ 💪",
-                    "น้ำหนักวันนี้ไม่ได้ตัดสินความสำเร็จของคุณ พรุ่งนี้เริ่มใหม่ได้เสมอ 🤍",
-                    "ไม่ต้องรีบค่อย ๆ ไปทีละก้าว คุณทำได้แน่นอน 🌷",
-                    "วันนี้อาจไม่เป็นอย่างหวัง แต่ไม่เป็นไรนะ เรามาสู้กันต่อ ✨"
-                ];
-                const randomComfort = comfortMessages[Math.floor(Math.random() * comfortMessages.length)];
+                const titleText = isBellAccount() ? "🤍 สู้ๆ นะคะที่รัก" : "🤍 สู้ๆ นะคะ/ครับ คนเก่ง";
+                const msgText = isBellAccount() ? "ไม่เป็นไรนะที่รัก น้ำหนักขึ้นได้ ก็ลดลงได้ สู้ต่อไปนะ เฟิร์สคอยเป็นกำลังใจให้เสมอ ❤️" : "ไม่เป็นไรนะ น้ำหนักขึ้นได้ ก็ลดลงได้ สู้ต่อไปนะ ❤️";
+                const btnText = isBellAccount() ? "สู้ตายค่ะที่รัก 💪" : "รับกำลังใจแล้ว ลุยต่อ! 💪";
 
-                showModal(
-                    "🤍 สู้ๆ นะคะ/ครับ คนเก่ง",
-                    `<span class="text-slate-700 font-medium text-sm">${randomComfort}</span>`,
-                    "🫂",
-                    `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-semibold text-xs">รับกำลังใจแล้ว ลุยต่อ! 💪</button>`
-                );
+                showModal(titleText, `<span class="text-slate-700 font-medium text-sm">${msgText}</span>`, "🫂", `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-semibold text-xs">${btnText}</button>`);
             } else {
-                showModal(
-                    "✅ สำเร็จ",
-                    "บันทึกน้ำหนักเรียบร้อยแล้วครับ! น้ำหนักคงที่",
-                    "⚖️",
-                    `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
-                );
+                const titleText = isBellAccount() ? "🥰 บันทึกเรียบร้อยครับที่รัก" : "✅ สำเร็จ";
+                const msgText = isBellAccount() ? "บันทึกเรียบร้อยครับที่รัก น้ำหนักคงที่แล้ว ลุยกันต่อเลย! ✨" : "บันทึกน้ำหนักเรียบร้อยแล้วครับ!";
+                const btnText = isBellAccount() ? "รับทราบค่ะที่รัก 💖" : "ตกลง";
+
+                showModal(titleText, msgText, "⚖️", `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">${btnText}</button>`);
             }
 
             fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }] }) }).catch(e => {});
@@ -1015,12 +1012,11 @@
             todayItems.push({ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: totalExCal, detail: `ออกกำลังกาย ${min} นาที` });
             renderDashboard(todayItems);
 
-            showModal(
-                "✅ สำเร็จ",
-                "บันทึกการออกกำลังกายเรียบร้อยแล้วครับ!",
-                "🏃",
-                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
-            );
+            const titleText = isBellAccount() ? "💪 เก่งมากครับที่รัก" : "✅ สำเร็จ";
+            const msgText = isBellAccount() ? "บันทึกการออกกำลังกายเรียบร้อยครับที่รัก ขยันที่สุดเลยคนนี้ 💖" : "บันทึกการออกกำลังกายเรียบร้อยแล้วครับ!";
+            const btnText = isBellAccount() ? "ขอบคุณค่ะที่รัก 😘" : "ตกลง";
+
+            showModal(titleText, msgText, "🏃", `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">${btnText}</button>`);
 
             fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'exercise', name: exName, calories: totalExCal, detail: `ออกกำลังกาย ${min} นาที` }] }) }).catch(e => {});
         }
