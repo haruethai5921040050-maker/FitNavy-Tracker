@@ -601,9 +601,17 @@
             document.getElementById('bottomNav').classList.remove('hidden');
             document.getElementById('btnLogout').classList.remove('hidden');
 
-            // 💖 ข้อความต้อนรับเฉพาะคุณ Bell ส่วนคนอื่นแสดงชื่อปกติ
+            // 💖 ปรับข้อความบน Header พร้อมเด้งป๊อปอัพต้อนรับพิเศษสำหรับคุณ Bell
             if (isBellAccount()) {
                 document.getElementById('userDisplay').innerText = `สวัสดีครับที่รัก (Bell) ❤️ วันนี้ลงเมนูครบหรือยังครับ?`;
+                
+                // เด้งป๊อปอัพต้อนรับสุดคลั่งรักทันทีที่เข้าสู่ระบบสำเร็จ
+                showModal(
+                    "❤️ ยินดีต้อนรับครับที่รัก",
+                    "สวัสดีครับที่รัก มาลงอาหารกันเลย เฟิร์สรักเบลครับ 💖",
+                    "🥰",
+                    `<button onclick="closeModal()" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs shadow-md">ปิดหน้าต่างนี้ 😘</button>`
+                );
             } else {
                 document.getElementById('userDisplay').innerText = `ผู้ใช้งาน: ${currentProfile.username} (${currentProfile.targetCalories} kcal/วัน)`;
             }
@@ -873,7 +881,6 @@
             document.getElementById('foodAmount').value = '1';
             renderBatchList();
 
-            // 🧋 ตรวจสอบเงื่อนไข: แยกเฉพาะคุณ Bell กับผู้ใช้อื่นๆ อย่างชัดเจน
             const lowerName = food.name.toLowerCase();
             if (isBellAccount()) {
                 if (lowerName.includes('ทอด') || lowerName.includes('โค้ก') || lowerName.includes('ชาไทย') || lowerName.includes('ชานม') || lowerName.includes('ไข่มุก') || lowerName.includes('หวาน')) {
@@ -885,7 +892,6 @@
                     );
                 }
             } else {
-                // สำหรับคนอื่นๆ อ่านค่าจาก Column D (warning) ใน Google Sheets ตามปกติที่เคยแก้ไว้
                 if (food.warning && food.warning !== "") {
                     showModal(
                         "🚨 แจ้งเตือนจากระบบ",
@@ -932,7 +938,6 @@
             renderBatchList();
             renderDashboard(todayItems);
 
-            // 💖 ป๊อปอัพบันทึกสำเร็จ (แยกเฉพาะ Bell กับคนอื่นๆ)
             const titleText = isBellAccount() ? "🥰 เก่งมากครับที่รัก" : "✅ สำเร็จ";
             const msgText = isBellAccount() ? "บันทึกเรียบร้อยครับที่รัก เก่งที่สุดเลย! 💖" : "บันทึกรายการอาหารเรียบร้อยแล้วครับ!";
             const btnText = isBellAccount() ? "ขอบคุณค่ะที่รัก 😘" : "ตกลง";
