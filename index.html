@@ -859,7 +859,6 @@
             document.getElementById('foodAmount').value = '1';
             renderBatchList();
 
-            // 🚨 ตรวจสอบข้อความเตือนจาก Google Sheets (Column D: warning)
             if (food.warning && food.warning !== "") {
                 showModal(
                     "🚨 ฮั่นแน่! แอบกินของอร่อยเหรอ?",
@@ -922,6 +921,15 @@
                 showModal("แจ้งเตือน", "กรุณากรอกน้ำหนักให้ถูกต้อง", "⚠️", `<button onclick="closeModal()" class="col-span-2 bg-slate-900 text-white py-2.5 rounded-xl text-xs font-semibold">ตกลง</button>`); return; 
             }
 
+            let previousWeight = parseFloat(currentProfile.weight);
+            if (historyCache.length > 0) {
+                const lastRecordWithWeight = historyCache.find(h => h.weight > 0);
+                if (lastRecordWithWeight) previousWeight = lastRecordWithWeight.weight;
+            }
+
+            const isWeightDecreased = w < previousWeight;
+            const isWeightIncreased = w > previousWeight;
+
             document.getElementById('inputWeightVal').value = '';
             calculateBMI(w, currentProfile.height);
             updateGoalProgressUI(w);
@@ -929,12 +937,61 @@
             renderDashboard(todayItems);
             loadHistoryData();
 
-            showModal(
-                "✅ สำเร็จ",
-                "บันทึกน้ำหนักเรียบร้อยแล้วครับ!",
-                "⚖️",
-                `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
-            );
+            if (isWeightDecreased) {
+                const encouragementMessages = [
+                    "เก่งมากกก! วันนี้ก็เป็นเวอร์ชันที่ดีขึ้นของตัวเองอีกวันแล้ว 💪",
+                    "สุดยอดมาก! ความพยายามของคุณกำลังออกดอกออกผลแล้วนะ 🌱",
+                    "วันนี้ทำได้ดีมาก ให้รางวัลตัวเองด้วยรอยยิ้มก็พอ 😊",
+                    "เก่งที่สุดเลย! อย่าลืมชมตัวเองบ้างนะ คนเก่งก็ต้องการกำลังใจเหมือนกัน",
+                    "อีกนิดเดียวก็เข้าใกล้เป้าหมายขึ้นแล้ว สู้ต่อไปนะ!",
+                    "ทำได้ดีมาก! วันนี้ขอให้คะแนนความตั้งใจเต็มสิบไปเลย ⭐",
+                    "ภูมิใจในตัวเองได้แล้วนะ คุณกำลังทำสิ่งดี ๆ ให้ตัวเองอยู่",
+                    "สุดปัง! วินัยเล็ก ๆ ในวันนี้ จะกลายเป็นความสำเร็จที่ยิ่งใหญ่ในวันหน้า",
+                    "เก่งมากครับ! ค่อย ๆ ลด ไม่ต้องรีบ แต่ขอให้มีความสุขด้วยนะ 😎",
+                    "วันนี้คุณชนะใจตัวเองได้อีกวันแล้ว ปรบมือให้ตัวเองดัง ๆ เลย 👏",
+                    "ทำได้ขนาดนี้แล้ว เก่งเกินต้านมากคุณน้าาา 💖",
+                    "ก้าวเล็ก ๆ ก็มีความหมาย วันนี้คุณเดินหน้าไปอีกก้าวแล้วนะ",
+                    "เยี่ยมมาก! ไม่ต้องสมบูรณ์แบบทุกวัน แค่ไม่เลิกพยายามก็เก่งแล้ว",
+                    "ขยันแบบนี้ อีกหน่อยต้องเรียกคุณคนใหม่แล้วแหละ 😉",
+                    "คุณกำลังไปได้สวยเลยนะ อย่าใจร้อนกับตัวเองล่ะ!",
+                    "เก่งมากก! วันนี้ดูแลตัวเองได้ดีแล้ว พรุ่งนี้มาสู้กันใหม่",
+                    "หนึ่งวันแห่งความตั้งใจ ขอให้ความมั่นใจเพิ่มขึ้นอีกหนึ่งระดับ 💯",
+                    "ทำดีแล้วครับ อย่าลืมว่าการพักก็เป็นส่วนหนึ่งของการดูแลตัวเองนะ",
+                    "ภารกิจวันนี้สำเร็จ! รับตำแหน่งคนเก่งประจำวันไปเลย 🏆"
+                ];
+                const randomMsg = encouragementMessages[Math.floor(Math.random() * encouragementMessages.length)];
+
+                showModal(
+                    "🎉 น้ำหนักลดลงแล้ว เยี่ยมมาก!",
+                    `<span class="text-blue-900 font-semibold text-sm">${randomMsg}</span>`,
+                    "🌟",
+                    `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">เย้ ขอบคุณครับ! 🥳</button>`
+                );
+            } else if (isWeightIncreased) {
+                // 💙 โหมดปลอบใจเมื่อน้ำหนักมากกว่าเดิม (สุ่ม 5 แบบ)
+                const comfortMessages = [
+                    "ไม่เป็นไรนะ น้ำหนักขึ้นได้ ก็ลดลงได้ สู้ต่อไปนะ ❤️",
+                    "อย่าเพิ่งท้อนะ ความพยายามของคุณยังมีความหมายเสมอ 💪",
+                    "น้ำหนักวันนี้ไม่ได้ตัดสินความสำเร็จของคุณ พรุ่งนี้เริ่มใหม่ได้เสมอ 🤍",
+                    "ไม่ต้องรีบค่อย ๆ ไปทีละก้าว คุณทำได้แน่นอน 🌷",
+                    "วันนี้อาจไม่เป็นอย่างหวัง แต่ไม่เป็นไรนะ เรามาสู้กันต่อ ✨"
+                ];
+                const randomComfort = comfortMessages[Math.floor(Math.random() * comfortMessages.length)];
+
+                showModal(
+                    "🤍 สู้ๆ นะคะ/ครับ คนเก่ง",
+                    `<span class="text-slate-700 font-medium text-sm">${randomComfort}</span>`,
+                    "🫂",
+                    `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-semibold text-xs">รับกำลังใจแล้ว ลุยต่อ! 💪</button>`
+                );
+            } else {
+                showModal(
+                    "✅ สำเร็จ",
+                    "บันทึกน้ำหนักเรียบร้อยแล้วครับ! น้ำหนักคงที่",
+                    "⚖️",
+                    `<button onclick="closeModal(); switchPage('dashboard');" class="col-span-2 bg-blue-900 hover:bg-blue-800 text-white py-2.5 rounded-xl font-semibold text-xs">ตกลง</button>`
+                );
+            }
 
             fetch(API_URL, { method: "POST", body: JSON.stringify({ action: "saveBatch", payload: [{ username: currentProfile.username, date: date, type: 'weight', name: 'บันทึกน้ำหนักตัว', calories: w, detail: 'น้ำหนักประจำวัน' }] }) }).catch(e => {});
         }
